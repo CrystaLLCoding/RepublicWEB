@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Премиальный барбершоп Republic в Ташкенте. Мужские стрижки, бритье, укладка. Онлайн запись через Altegio. Профессиональные мастера.">
+    <meta name="keywords" content="барбершоп Ташкент, стрижка мужская, бритье, Republic Barbershop, парикмахерская Ташкент">
+    <meta name="author" content="Republic Barbershop">
+    <meta property="og:title" content="Republic Barbershop - Премиальный барбершоп в Ташкенте">
+    <meta property="og:description" content="Классика и стиль в самом сердце Ташкента. Онлайн запись, профессиональные мастера.">
+    <meta property="og:type" content="website">
+    <title>Republic Barbershop - Премиальный барбершоп в Ташкенте</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <div class="barber-pole">
+                        <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <clipPath id="circleClip">
+                                    <circle cx="16" cy="16" r="14"/>
+                                </clipPath>
+                            </defs>
+                            <!-- Белый фон -->
+                            <circle cx="16" cy="16" r="14" fill="#FFFFFF" stroke="#1a1a1a" stroke-width="1.8"/>
+                            <!-- Диагональные полосы -->
+                            <g clip-path="url(#circleClip)">
+                                <g transform="translate(16,16)">
+                                    <!-- Красные полосы -->
+                                    <rect x="-16" y="-16" width="32" height="4" fill="#DC143C" transform="rotate(45)"/>
+                                    <rect x="-16" y="-8" width="32" height="4" fill="#DC143C" transform="rotate(45)"/>
+                                    <rect x="-16" y="0" width="32" height="4" fill="#DC143C" transform="rotate(45)"/>
+                                    <rect x="-16" y="8" width="32" height="4" fill="#DC143C" transform="rotate(45)"/>
+                                    <!-- Синие полосы -->
+                                    <rect x="-16" y="-12" width="32" height="4" fill="#003366" transform="rotate(45)"/>
+                                    <rect x="-16" y="-4" width="32" height="4" fill="#003366" transform="rotate(45)"/>
+                                    <rect x="-16" y="4" width="32" height="4" fill="#003366" transform="rotate(45)"/>
+                                    <rect x="-16" y="12" width="32" height="4" fill="#003366" transform="rotate(45)"/>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <h1>REPUBLIC</h1>
+                        <span>BARBERSHOP</span>
+                    </div>
+                </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#home">Главная</a></li>
+                    <li><a href="#about">О нас</a></li>
+                    <li><a href="#services">Услуги</a></li>
+                    <li><a href="#masters">Мастера</a></li>
+                    <li><a href="#gallery">Галерея</a></li>
+                    <li><a href="#reviews">Отзывы</a></li>
+                    <li><a href="#contact">Контакты</a></li>
+                    <li><a href="https://n1326833.alteg.io" target="_blank" class="btn-booking-link">Онлайн запись</a></li>
+                </ul>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">REPUBLIC BARBERSHOP</h1>
+            <p class="hero-subtitle">Классика и стиль в самом сердце Ташкента</p>
+            <a href="https://n1326833.alteg.io" target="_blank" class="btn btn-primary">Записаться онлайн</a>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>О нас</h2>
+                <p>Профессионализм и внимание к деталям</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Добро пожаловать в Republic Barbershop</h3>
+                    <p>Мы — премиальный барбершоп в центре Ташкента, где классические традиции парикмахерского искусства встречаются с современными трендами. Наши мастера обладают многолетним опытом и стремятся к совершенству в каждой стрижке.</p>
+                    <p>В Republic мы создаем не просто стрижки — мы создаем стиль, который отражает вашу индивидуальность. Каждый визит — это опыт, где комфорт и качество стоят на первом месте.</p>
+                    <div class="features">
+                        <div class="feature">
+                            <div class="feature-icon">✂️</div>
+                            <h4>Мастера профессионалы</h4>
+                            <p>Опытные барберы с многолетним стажем</p>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">⭐</div>
+                            <h4>Премиум качество</h4>
+                            <p>Только лучшие инструменты и материалы</p>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">🏆</div>
+                            <h4>Индивидуальный подход</h4>
+                            <p>Каждый клиент получает персональное внимание</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-header">
+                <h2>Наши услуги</h2>
+                <p>Широкий спектр услуг для вашего стиля</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">💇</div>
+                    <h3>Мужская стрижка</h3>
+                    <p>Классические и современные мужские стрижки любой сложности</p>
+                    <div class="service-price">от 150 000 сум</div>
+                    <div class="service-duration">45 минут</div>
+                </div>
+                <div class="service-card" data-service="Бритье" data-price="100000" data-duration="30">
+                    <div class="service-icon">🪒</div>
+                    <h3>Бритье</h3>
+                    <p>Традиционное опасное бритье с горячим полотенцем</p>
+                    <div class="service-price">от 100 000 сум</div>
+                    <div class="service-duration">30 минут</div>
+                </div>
+                <div class="service-card" data-service="Стрижка + Бритье" data-price="220000" data-duration="75">
+                    <div class="service-icon">✂️</div>
+                    <h3>Стрижка + Бритье</h3>
+                    <p>Комплексная услуга: стрижка и бритье</p>
+                    <div class="service-price">от 220 000 сум</div>
+                    <div class="service-duration">75 минут</div>
+                </div>
+                <div class="service-card" data-service="Укладка волос" data-price="80000" data-duration="20">
+                    <div class="service-icon">💆</div>
+                    <h3>Укладка волос</h3>
+                    <p>Профессиональная укладка и стайлинг</p>
+                    <div class="service-price">от 80 000 сум</div>
+                    <div class="service-duration">20 минут</div>
+                </div>
+                <div class="service-card" data-service="Окрашивание" data-price="200000" data-duration="90">
+                    <div class="service-icon">🎨</div>
+                    <h3>Окрашивание</h3>
+                    <p>Окрашивание волос любой сложности</p>
+                    <div class="service-price">от 200 000 сум</div>
+                    <div class="service-duration">90 минут</div>
+                </div>
+                <div class="service-card" data-service="Уход за бородой" data-price="120000" data-duration="40">
+                    <div class="service-icon">🧔</div>
+                    <h3>Уход за бородой</h3>
+                    <p>Стрижка, укладка и уход за бородой</p>
+                    <div class="service-price">от 120 000 сум</div>
+                    <div class="service-duration">40 минут</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Masters Section -->
+    <section id="masters" class="masters">
+        <div class="container">
+            <div class="section-header">
+                <h2>Наши мастера</h2>
+                <p>Профессионалы с многолетним опытом</p>
+            </div>
+            <div class="masters-grid">
+                <div class="master-card" data-master="Алексей">
+                    <div class="master-photo">
+                        <div class="master-placeholder">👨‍💼</div>
+                    </div>
+                    <h3>Алексей Иванов</h3>
+                    <p class="master-specialty">Топ-мастер</p>
+                    <p class="master-experience">Опыт: 8 лет</p>
+                    <div class="master-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="master-description">Специализируется на классических и современных стрижках. Мастер опасного бритья.</p>
+                </div>
+                <div class="master-card" data-master="Дмитрий">
+                    <div class="master-photo">
+                        <div class="master-placeholder">👨‍🎨</div>
+                    </div>
+                    <h3>Дмитрий Смирнов</h3>
+                    <p class="master-specialty">Стилист</p>
+                    <p class="master-experience">Опыт: 6 лет</p>
+                    <div class="master-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="master-description">Эксперт по креативным стрижкам и окрашиванию. Следит за последними трендами.</p>
+                </div>
+                <div class="master-card" data-master="Максим">
+                    <div class="master-photo">
+                        <div class="master-placeholder">👨‍💇</div>
+                    </div>
+                    <h3>Максим Петров</h3>
+                    <p class="master-specialty">Барбер</p>
+                    <p class="master-experience">Опыт: 5 лет</p>
+                    <div class="master-rating">⭐⭐⭐⭐⭐</div>
+                    <p class="master-description">Мастер по уходу за бородой и классическому бритью. Внимателен к деталям.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery">
+        <div class="container">
+            <div class="section-header">
+                <h2>Галерея</h2>
+                <p>Наши работы и атмосфера</p>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <span>📸</span>
+                        <p>Фото 1</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <span>📸</span>
+                        <p>Фото 2</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <span>📸</span>
+                        <p>Фото 3</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <span>📸</span>
+                        <p>Фото 4</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <span>📸</span>
+                        <p>Фото 5</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">
+                        <span>📸</span>
+                        <p>Фото 6</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section id="reviews" class="reviews">
+        <div class="container">
+            <div class="section-header">
+                <h2>Отзывы клиентов</h2>
+                <p>Что говорят о нас наши клиенты</p>
+            </div>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-avatar">И</div>
+                            <div>
+                                <h4>Иван Петров</h4>
+                                <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <div class="review-date">15.11.2024</div>
+                    </div>
+                    <p class="review-text">Отличный барбершоп! Алексей - настоящий профессионал. Стрижка и бритье на высшем уровне. Атмосфера приятная, все чисто и аккуратно. Рекомендую!</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-avatar">А</div>
+                            <div>
+                                <h4>Александр Козлов</h4>
+                                <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <div class="review-date">12.11.2024</div>
+                    </div>
+                    <p class="review-text">Хожу сюда уже год. Всегда доволен результатом. Удобная онлайн запись, не нужно ждать в очереди. Мастера вежливые и внимательные.</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-avatar">М</div>
+                            <div>
+                                <h4>Максим Соколов</h4>
+                                <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <div class="review-date">08.11.2024</div>
+                    </div>
+                    <p class="review-text">Лучший барбершоп в городе! Дмитрий сделал отличную стрижку и окрашивание. Современный подход, качественные материалы. Цены адекватные.</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-avatar">Д</div>
+                            <div>
+                                <h4>Дмитрий Новиков</h4>
+                                <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <div class="review-date">05.11.2024</div>
+                    </div>
+                    <p class="review-text">Прекрасное место! Максим отлично работает с бородой. Удобное расположение, комфортная обстановка. Теперь только сюда!</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-avatar">С</div>
+                            <div>
+                                <h4>Сергей Волков</h4>
+                                <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <div class="review-date">02.11.2024</div>
+                    </div>
+                    <p class="review-text">Профессионализм на высшем уровне! Все мастера знают свое дело. Удобная запись онлайн, пришел точно в свое время.</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-avatar">Н</div>
+                            <div>
+                                <h4>Николай Лебедев</h4>
+                                <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <div class="review-date">28.10.2024</div>
+                    </div>
+                    <p class="review-text">Отличный сервис! Стрижка превзошла все ожидания. Персонал дружелюбный, атмосфера расслабляющая. Обязательно вернусь!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2>Контакты</h2>
+                <p>Свяжитесь с нами и запишитесь на прием</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <h3>Адрес</h3>
+                            <p>Ташкент, Узбекистан</p>
+                            <p>(уточните конкретный адрес)</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <h3>Телефон</h3>
+                            <p>+998 (XX) XXX-XX-XX</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">🕒</div>
+                        <div>
+                            <h3>Часы работы</h3>
+                            <p>Пн - Вс: 10:00 - 20:00</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div>
+                            <h3>Социальные сети</h3>
+                            <div class="social-links">
+                                <a href="#" class="social-link">Instagram</a>
+                                <a href="#" class="social-link">Telegram</a>
+                                <a href="#" class="social-link">Facebook</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📅</div>
+                        <div>
+                            <h3>Онлайн запись</h3>
+                            <p>Запишитесь на удобное время через Altegio</p>
+                            <a href="https://n1326833.alteg.io" target="_blank" class="btn btn-primary" style="margin-top: 1rem;">Записаться онлайн</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form-container">
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-group">
+                            <input type="text" id="name" placeholder="Ваше имя" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="phone" placeholder="Ваш телефон" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" placeholder="Ваш email">
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" rows="5" placeholder="Сообщение (необязательно)"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>REPUBLIC</h3>
+                    <span>BARBERSHOP</span>
+                </div>
+                <p>&copy; 2024 Republic Barbershop. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Gallery Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-content">
+            <img src="" alt="" id="lightboxImage">
+        </div>
+        <div class="lightbox-nav">
+            <button class="lightbox-prev">‹</button>
+            <button class="lightbox-next">›</button>
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
+

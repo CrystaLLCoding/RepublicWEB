@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель - Republic Barbershop</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>REPUBLIC</h1>
+                <span>Админ панель</span>
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" id="loginUsername" placeholder="Введите логин" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="loginPassword" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <p class="login-info">По умолчанию: admin / admin123</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <div class="admin-logo">
+                    <h2>REPUBLIC</h2>
+                    <span>Админ панель</span>
+                </div>
+                <div class="admin-actions">
+                    <a href="index.html" class="btn btn-secondary">На сайт</a>
+                    <button class="btn btn-danger" id="logoutBtn">Выход</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="admin-container">
+            <!-- Sidebar -->
+            <aside class="admin-sidebar">
+                <nav class="admin-nav">
+                    <a href="#services" class="nav-item active" data-section="services">
+                        <span>✂️</span>
+                        <span>Услуги</span>
+                    </a>
+                    <a href="#gallery" class="nav-item" data-section="gallery">
+                        <span>🖼️</span>
+                        <span>Галерея</span>
+                    </a>
+                    <a href="#masters" class="nav-item" data-section="masters">
+                        <span>👨‍💼</span>
+                        <span>Мастера</span>
+                    </a>
+                    <a href="#reviews" class="nav-item" data-section="reviews">
+                        <span>⭐</span>
+                        <span>Отзывы</span>
+                    </a>
+                    <a href="#settings" class="nav-item" data-section="settings">
+                        <span>⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Content Area -->
+            <main class="admin-content">
+                <!-- Services Section -->
+                <section class="admin-section active" id="services-section">
+                    <div class="section-header">
+                        <h2>Управление услугами</h2>
+                        <button class="btn btn-primary" id="addServiceBtn">+ Добавить услугу</button>
+                    </div>
+                    <div class="services-list" id="servicesList">
+                        <!-- Services will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Gallery Section -->
+                <section class="admin-section" id="gallery-section">
+                    <div class="section-header">
+                        <h2>Управление галереей</h2>
+                        <div class="upload-area" id="uploadArea">
+                            <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+                            <label for="imageUpload" class="btn btn-primary">+ Загрузить фото</label>
+                            <p>Перетащите файлы сюда или нажмите для выбора</p>
+                        </div>
+                    </div>
+                    <div class="gallery-grid-admin" id="galleryGridAdmin">
+                        <!-- Gallery items will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Masters Section -->
+                <section class="admin-section" id="masters-section">
+                    <div class="section-header">
+                        <h2>Управление мастерами</h2>
+                        <button class="btn btn-primary" id="addMasterBtn">+ Добавить мастера</button>
+                    </div>
+                    <div class="masters-list-admin" id="mastersListAdmin">
+                        <!-- Masters will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Reviews Section -->
+                <section class="admin-section" id="reviews-section">
+                    <div class="section-header">
+                        <h2>Управление отзывами</h2>
+                    </div>
+                    <div class="reviews-list-admin" id="reviewsListAdmin">
+                        <!-- Reviews will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section class="admin-section" id="settings-section">
+                    <div class="section-header">
+                        <h2>Настройки сайта</h2>
+                    </div>
+                    <div class="settings-form" id="settingsForm">
+                        <div class="form-group">
+                            <label>Адрес</label>
+                            <input type="text" id="settingAddress" placeholder="Ташкент, Узбекистан">
+                        </div>
+                        <div class="form-group">
+                            <label>Телефон</label>
+                            <input type="tel" id="settingPhone" placeholder="+998 (XX) XXX-XX-XX">
+                        </div>
+                        <div class="form-group">
+                            <label>Часы работы</label>
+                            <input type="text" id="settingHours" placeholder="Пн - Вс: 10:00 - 20:00">
+                        </div>
+                        <div class="form-group">
+                            <label>Instagram</label>
+                            <input type="url" id="settingInstagram" placeholder="https://instagram.com/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Telegram</label>
+                            <input type="url" id="settingTelegram" placeholder="https://t.me/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Facebook</label>
+                            <input type="url" id="settingFacebook" placeholder="https://facebook.com/...">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="saveSettingsBtn">Сохранить настройки</button>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Service Modal -->
+    <div class="modal" id="serviceModal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 id="serviceModalTitle">Добавить услугу</h2>
+            <form id="serviceForm">
+                <input type="hidden" id="serviceId">
+                <div class="form-group">
+                    <label>Название услуги</label>
+                    <input type="text" id="serviceName" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="serviceDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Цена (сум)</label>
+                    <input type="number" id="servicePrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Длительность (минуты)</label>
+                    <input type="number" id="serviceDuration" required>
+                </div>
+                <div class="form-group">
+                    <label>Эмодзи/Иконка</label>
+                    <input type="text" id="serviceIcon" placeholder="💇" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <button type="button" class="btn btn-secondary modal-cancel">Отмена</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Master Modal -->
+    <div class="modal" id="masterModal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 id="masterModalTitle">Добавить мастера</h2>
+            <form id="masterForm">
+                <input type="hidden" id="masterId">
+                <div class="form-group">
+                    <label>Имя</label>
+                    <input type="text" id="masterName" required>
+                </div>
+                <div class="form-group">
+                    <label>Специальность</label>
+                    <input type="text" id="masterSpecialty" placeholder="Топ-мастер">
+                </div>
+                <div class="form-group">
+                    <label>Опыт (лет)</label>
+                    <input type="number" id="masterExperience" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="masterDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Эмодзи/Аватар</label>
+                    <input type="text" id="masterIcon" placeholder="👨‍💼" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <button type="button" class="btn btn-secondary modal-cancel">Отмена</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
+
+
