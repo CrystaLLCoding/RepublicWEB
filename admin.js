@@ -76,13 +76,13 @@ async function initializeLogin() {
         e.preventDefault();
         const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
-        
+
         try {
             const data = await apiCall('/auth/login', {
                 method: 'POST',
                 body: JSON.stringify({ username, password })
             });
-            
+
             authToken = data.token;
             localStorage.setItem('adminToken', authToken);
             showAdminPanel();
@@ -91,7 +91,7 @@ async function initializeLogin() {
             alert('Неверный логин или пароль: ' + error.message);
         }
     });
-    
+
     document.getElementById('logoutBtn').addEventListener('click', () => {
         localStorage.removeItem('adminToken');
         authToken = '';
@@ -106,10 +106,10 @@ function initializeNavigation() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const section = item.dataset.section;
-            
+
             navItems.forEach(ni => ni.classList.remove('active'));
             item.classList.add('active');
-            
+
             showSection(section);
         });
     });
@@ -120,7 +120,7 @@ function showSection(sectionName) {
     sections.forEach(section => {
         section.classList.remove('active');
     });
-    
+
     document.getElementById(`${sectionName}-section`).classList.add('active');
 }
 
@@ -137,7 +137,7 @@ function initializeServices() {
     document.getElementById('addServiceBtn').addEventListener('click', () => {
         openServiceModal();
     });
-    
+
     document.getElementById('serviceForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await saveService();
@@ -160,7 +160,7 @@ function renderServices(services) {
         container.innerHTML = '<p style="color: var(--text-gray);">Услуг пока нет. Добавьте первую услугу.</p>';
         return;
     }
-    
+
     container.innerHTML = services.map(service => `
         <div class="service-item-admin">
             <div class="service-icon-admin">${service.icon || '✂️'}</div>
@@ -179,7 +179,7 @@ function renderServices(services) {
 
 async function openServiceModal(serviceId = null) {
     const modal = document.getElementById('serviceModal');
-    
+
     if (serviceId) {
         try {
             const services = await apiCall('/services');
@@ -201,7 +201,7 @@ async function openServiceModal(serviceId = null) {
         document.getElementById('serviceForm').reset();
         document.getElementById('serviceId').value = '';
     }
-    
+
     modal.classList.add('active');
 }
 
@@ -214,7 +214,7 @@ async function saveService() {
         duration: parseInt(document.getElementById('serviceDuration').value),
         icon: document.getElementById('serviceIcon').value
     };
-    
+
     try {
         if (serviceId) {
             await apiCall(`/services/${serviceId}`, {
@@ -227,7 +227,7 @@ async function saveService() {
                 body: JSON.stringify(serviceData)
             });
         }
-        
+
         await loadServices();
         closeModal('serviceModal');
     } catch (error) {
@@ -241,7 +241,7 @@ async function editService(id) {
 
 async function deleteService(id) {
     if (!confirm('Вы уверены, что хотите удалить эту услугу?')) return;
-    
+
     try {
         await apiCall(`/services/${id}`, { method: 'DELETE' });
         await loadServices();
@@ -254,18 +254,18 @@ async function deleteService(id) {
 function initializeGallery() {
     const uploadInput = document.getElementById('imageUpload');
     const uploadArea = document.getElementById('uploadArea');
-    
+
     uploadInput.addEventListener('change', handleImageUpload);
-    
+
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.style.borderColor = 'var(--secondary-color)';
     });
-    
+
     uploadArea.addEventListener('dragleave', () => {
         uploadArea.style.borderColor = '#e0e0e0';
     });
-    
+
     uploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadArea.style.borderColor = '#e0e0e0';
@@ -322,25 +322,45 @@ async function loadGallery() {
 
 function renderGallery(gallery) {
     const container = document.getElementById('galleryGridAdmin');
+
+    // Clear container
+    container.innerHTML = '';
+
     if (gallery.length === 0) {
         container.innerHTML = '<p style="color: var(--text-gray);">Галерея пуста. Загрузите фото.</p>';
         return;
     }
-    
-    container.innerHTML = gallery.map((item, index) => {
+
+    // Create elements using DOM API to avoid text nodes
+    gallery.forEach((item, index) => {
         const imageUrl = item.image_url.startsWith('http') ? item.image_url : `${API_BASE_URL}${item.image_url}`;
-        return `
-            <div class="gallery-item-admin">
-                <img src="${imageUrl}" alt="Gallery image ${index + 1}">
-                <button class="delete-btn" onclick="deleteGalleryImage(${item.id})" title="Удалить">×</button>
-            </div>
-        `;
-    }).join('');
+
+        // Create gallery item div
+        const galleryItem = document.createElement('div');
+        galleryItem.className = 'gallery-item-admin';
+
+        // Create image
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = `Gallery image ${index + 1}`;
+
+        // Create delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.title = 'Удалить';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.onclick = () => deleteGalleryImage(item.id);
+
+        // Append elements
+        galleryItem.appendChild(img);
+        galleryItem.appendChild(deleteBtn);
+        container.appendChild(galleryItem);
+    });
 }
 
 async function deleteGalleryImage(id) {
     if (!confirm('Удалить это фото?')) return;
-    
+
     try {
         await apiCall(`/gallery/${id}`, { method: 'DELETE' });
         await loadGallery();
@@ -354,7 +374,7 @@ function initializeMasters() {
     document.getElementById('addMasterBtn').addEventListener('click', () => {
         openMasterModal();
     });
-    
+
     document.getElementById('masterForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await saveMaster();
@@ -377,7 +397,7 @@ function renderMasters(masters) {
         container.innerHTML = '<p style="color: var(--text-gray);">Мастеров пока нет. Добавьте первого мастера.</p>';
         return;
     }
-    
+
     container.innerHTML = masters.map(master => `
         <div class="master-item-admin">
             <div class="master-icon-admin">${master.icon || '👨‍💼'}</div>
@@ -395,7 +415,7 @@ function renderMasters(masters) {
 
 async function openMasterModal(masterId = null) {
     const modal = document.getElementById('masterModal');
-    
+
     if (masterId) {
         try {
             const masters = await apiCall('/masters');
@@ -417,7 +437,7 @@ async function openMasterModal(masterId = null) {
         document.getElementById('masterForm').reset();
         document.getElementById('masterId').value = '';
     }
-    
+
     modal.classList.add('active');
 }
 
@@ -430,7 +450,7 @@ async function saveMaster() {
         description: document.getElementById('masterDescription').value,
         icon: document.getElementById('masterIcon').value
     };
-    
+
     try {
         if (masterId) {
             await apiCall(`/masters/${masterId}`, {
@@ -443,7 +463,7 @@ async function saveMaster() {
                 body: JSON.stringify(masterData)
             });
         }
-        
+
         await loadMasters();
         closeModal('masterModal');
     } catch (error) {
@@ -457,7 +477,7 @@ async function editMaster(id) {
 
 async function deleteMaster(id) {
     if (!confirm('Вы уверены, что хотите удалить этого мастера?')) return;
-    
+
     try {
         await apiCall(`/masters/${id}`, { method: 'DELETE' });
         await loadMasters();
@@ -487,7 +507,7 @@ function renderReviews(reviews) {
         container.innerHTML = '<p style="color: var(--text-gray);">Отзывов пока нет.</p>';
         return;
     }
-    
+
     container.innerHTML = reviews.map(review => `
         <div class="review-item-admin">
             <div class="review-header-admin">
@@ -507,7 +527,7 @@ function renderReviews(reviews) {
 
 async function deleteReview(id) {
     if (!confirm('Удалить этот отзыв?')) return;
-    
+
     try {
         await apiCall(`/reviews/${id}`, { method: 'DELETE' });
         await loadReviews();
@@ -530,7 +550,8 @@ async function loadSettings() {
         document.getElementById('settingHours').value = settings.hours || 'Пн - Вс: 10:00 - 20:00';
         document.getElementById('settingInstagram').value = settings.instagram || '';
         document.getElementById('settingTelegram').value = settings.telegram || '';
-        document.getElementById('settingFacebook').value = settings.facebook || '';
+        document.getElementById('settingTelegramToken').value = settings.telegram_token || '';
+        document.getElementById('settingTelegramChatId').value = settings.telegram_chat_id || '';
     } catch (error) {
         console.error('Error loading settings:', error);
     }
@@ -543,9 +564,10 @@ async function saveSettings() {
         hours: document.getElementById('settingHours').value,
         instagram: document.getElementById('settingInstagram').value,
         telegram: document.getElementById('settingTelegram').value,
-        facebook: document.getElementById('settingFacebook').value
+        telegram_token: document.getElementById('settingTelegramToken').value,
+        telegram_chat_id: document.getElementById('settingTelegramChatId').value
     };
-    
+
     try {
         await apiCall('/settings', {
             method: 'PUT',
@@ -563,10 +585,10 @@ function initializeModals() {
     modals.forEach(modal => {
         const closeBtn = modal.querySelector('.modal-close');
         const cancelBtn = modal.querySelector('.modal-cancel');
-        
+
         closeBtn.addEventListener('click', () => closeModal(modal.id));
         cancelBtn?.addEventListener('click', () => closeModal(modal.id));
-        
+
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeModal(modal.id);

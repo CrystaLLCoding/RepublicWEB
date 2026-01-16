@@ -100,6 +100,7 @@ body {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
@@ -277,6 +278,7 @@ body {
         opacity: 1;
         top: 10px;
     }
+
     100% {
         opacity: 0;
         top: 30px;
@@ -288,6 +290,7 @@ body {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -858,6 +861,7 @@ section {
         opacity: 0;
         transform: translateY(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -929,7 +933,7 @@ section {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .hamburger {
         display: flex;
     }
@@ -944,12 +948,33 @@ section {
         padding: 2rem;
         transition: var(--transition);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        align-items: center;
+        overflow-y: auto;
+        max-height: calc(100vh - 70px);
     }
 
     .nav-menu.active {
         left: 0;
     }
 
+    .nav-menu li {
+        margin: 10px 0;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        letter-spacing: 5px;
+    }
+
+    .feature,
+    .service-card,
+    .master-card,
+    .review-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
     .hero-title {
         font-size: 2.5rem;
         letter-spacing: 4px;
@@ -1021,13 +1046,35 @@ section {
     }
 
     .logo h1 {
-        font-size: 1.5rem;
-        letter-spacing: 2px;
+        font-size: 1.2rem;
+        letter-spacing: 1px;
     }
 
     .logo span {
-        font-size: 0.6rem;
-        letter-spacing: 3px;
+        font-size: 0.5rem;
+        letter-spacing: 2px;
+    }
+
+    /* Fix for large text in cards */
+    .service-icon {
+        font-size: 1.8rem;
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+        line-height: 1.2;
+    }
+
+    .service-card h3 {
+        font-size: 1.2rem;
+        word-wrap: break-word;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        word-wrap: break-word;
+        max-width: 100%;
     }
 }
-

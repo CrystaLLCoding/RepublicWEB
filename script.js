@@ -26,13 +26,13 @@ let lastScroll = 0;
 
 window.addEventListener('scroll', () => {
     const currentScroll = window.pageYOffset;
-    
+
     if (currentScroll > 100 && navbar) {
         navbar.classList.add('scrolled');
     } else if (navbar) {
         navbar.classList.remove('scrolled');
     }
-    
+
     lastScroll = currentScroll;
 });
 
@@ -41,7 +41,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
-        
+
         if (target) {
             const offsetTop = target.offsetTop - 80;
             window.scrollTo({
@@ -58,17 +58,39 @@ const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Отправка...';
+
         const name = document.getElementById('name').value;
         const phone = document.getElementById('phone').value;
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
-        
-        // Here you can send to API if needed
-        // For now, just show success message
-        alert(`Спасибо, ${name}! Ваша заявка принята. Мы свяжемся с вами по телефону ${phone} в ближайшее время.`);
-        
-        contactForm.reset();
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/contact`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, phone, email, message })
+            });
+
+            if (response.ok) {
+                alert(`Спасибо, ${name}! Ваша заявка принята. Мы свяжемся с вами в ближайшее время.`);
+                contactForm.reset();
+            } else {
+                throw new Error('Ошибка отправки');
+            }
+        } catch (error) {
+            console.error('Error sending contact form:', error);
+            alert('Произошла ошибка при отправке заявки. Пожалуйста, попробуйте позже или позвоните нам.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+        }
     });
 }
 
@@ -94,8 +116,11 @@ async function loadDataFromAPI() {
 async function loadServicesFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/services`);
-        if (!response.ok) return;
-        
+        if (!response.ok) {
+            console.warn('Failed to load services from API, using default content');
+            return;
+        }
+
         const services = await response.json();
         if (services.length > 0) {
             const servicesGrid = document.querySelector('.services-grid');
@@ -112,7 +137,8 @@ async function loadServicesFromAPI() {
             }
         }
     } catch (error) {
-        console.error('Error loading services:', error);
+        console.warn('Error loading services:', error);
+        // Fallback: keep default HTML content
     }
 }
 
@@ -120,8 +146,11 @@ async function loadServicesFromAPI() {
 async function loadMastersFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/masters`);
-        if (!response.ok) return;
-        
+        if (!response.ok) {
+            console.warn('Failed to load masters from API, using default content');
+            return;
+        }
+
         const masters = await response.json();
         if (masters.length > 0) {
             const mastersGrid = document.querySelector('.masters-grid');
@@ -141,7 +170,8 @@ async function loadMastersFromAPI() {
             }
         }
     } catch (error) {
-        console.error('Error loading masters:', error);
+        console.warn('Error loading masters:', error);
+        // Fallback: keep default HTML content
     }
 }
 
@@ -149,8 +179,11 @@ async function loadMastersFromAPI() {
 async function loadGalleryFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/gallery`);
-        if (!response.ok) return;
-        
+        if (!response.ok) {
+            console.warn('Failed to load gallery from API, using default content');
+            return;
+        }
+
         const gallery = await response.json();
         if (gallery.length > 0) {
             const galleryGrid = document.querySelector('.gallery-grid');
@@ -159,11 +192,11 @@ async function loadGalleryFromAPI() {
                     const imageUrl = item.image_url.startsWith('http') ? item.image_url : `${API_BASE_URL}${item.image_url}`;
                     return `
                         <div class="gallery-item">
-                            <img src="${imageUrl}" alt="Gallery image ${index + 1}">
+                            <img src="${imageUrl}" alt="Gallery image ${index + 1}" onerror="this.parentElement.innerHTML='<div class=\"gallery-placeholder\"><span>📸</span><p>Фото ${index + 1}</p></div>
                         </div>
                     `;
                 }).join('');
-                
+
                 // Re-initialize lightbox for new images
                 setTimeout(() => {
                     initializeLightbox();
@@ -171,7 +204,8 @@ async function loadGalleryFromAPI() {
             }
         }
     } catch (error) {
-        console.error('Error loading gallery:', error);
+        console.warn('Error loading gallery:', error);
+        // Fallback: keep default HTML content
     }
 }
 
@@ -179,8 +213,11 @@ async function loadGalleryFromAPI() {
 async function loadReviewsFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/reviews`);
-        if (!response.ok) return;
-        
+        if (!response.ok) {
+            console.warn('Failed to load reviews from API, using default content');
+            return;
+        }
+
         const reviews = await response.json();
         if (reviews.length > 0) {
             const reviewsGrid = document.querySelector('.reviews-grid');
@@ -203,7 +240,8 @@ async function loadReviewsFromAPI() {
             }
         }
     } catch (error) {
-        console.error('Error loading reviews:', error);
+        console.warn('Error loading reviews:', error);
+        // Fallback: keep default HTML content
     }
 }
 
@@ -211,10 +249,13 @@ async function loadReviewsFromAPI() {
 async function loadSettingsFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/settings`);
-        if (!response.ok) return;
-        
+        if (!response.ok) {
+            console.warn('Failed to load settings from API, using default content');
+            return;
+        }
+
         const settings = await response.json();
-        
+
         if (settings.address) {
             const addressEls = document.querySelectorAll('.contact-item');
             if (addressEls[0]) {
@@ -222,7 +263,7 @@ async function loadSettingsFromAPI() {
                 if (addressP) addressP.textContent = settings.address;
             }
         }
-        
+
         if (settings.phone) {
             const phoneEls = document.querySelectorAll('.contact-item');
             if (phoneEls[1]) {
@@ -230,7 +271,7 @@ async function loadSettingsFromAPI() {
                 if (phoneP) phoneP.textContent = settings.phone;
             }
         }
-        
+
         if (settings.hours) {
             const hoursEls = document.querySelectorAll('.contact-item');
             if (hoursEls[2]) {
@@ -238,23 +279,32 @@ async function loadSettingsFromAPI() {
                 if (hoursP) hoursP.textContent = settings.hours;
             }
         }
-        
-        if (settings.instagram) {
-            const instagramLink = document.querySelector('.social-links a:nth-of-type(1)');
-            if (instagramLink) instagramLink.href = settings.instagram;
+
+        // Social links - hide if not set
+        const instagramLink = document.querySelector('.social-links a:nth-of-type(1)');
+        if (instagramLink) {
+            if (settings.instagram && settings.instagram !== '') {
+                instagramLink.href = settings.instagram;
+                instagramLink.style.display = '';
+            } else {
+                instagramLink.style.display = 'none';
+            }
         }
-        
-        if (settings.telegram) {
-            const telegramLink = document.querySelector('.social-links a:nth-of-type(2)');
-            if (telegramLink) telegramLink.href = settings.telegram;
+
+        const telegramLink = document.querySelector('.social-links a:nth-of-type(2)');
+        if (telegramLink) {
+            if (settings.telegram && settings.telegram !== '') {
+                telegramLink.href = settings.telegram;
+                telegramLink.style.display = '';
+            } else {
+                telegramLink.style.display = 'none';
+            }
         }
-        
-        if (settings.facebook) {
-            const facebookLink = document.querySelector('.social-links a:nth-of-type(3)');
-            if (facebookLink) facebookLink.href = settings.facebook;
-        }
+
+
     } catch (error) {
-        console.error('Error loading settings:', error);
+        console.warn('Error loading settings:', error);
+        // Fallback: keep default HTML content
     }
 }
 
@@ -277,9 +327,9 @@ function initializeLightbox() {
     const lightboxClose = document.querySelector('.lightbox-close');
     const lightboxPrev = document.querySelector('.lightbox-prev');
     const lightboxNext = document.querySelector('.lightbox-next');
-    
+
     if (!lightbox || !lightboxImage) return;
-    
+
     // Collect all gallery images
     galleryImages = [];
     galleryItems.forEach((item) => {
@@ -288,7 +338,7 @@ function initializeLightbox() {
             galleryImages.push(img.src);
         }
     });
-    
+
     // Add click handlers for gallery items
     galleryItems.forEach((item, index) => {
         const img = item.querySelector('img');
@@ -301,12 +351,12 @@ function initializeLightbox() {
             });
         }
     });
-    
+
     // Close button
     if (lightboxClose) {
         lightboxClose.addEventListener('click', closeLightbox);
     }
-    
+
     // Navigation buttons
     if (lightboxPrev) {
         lightboxPrev.addEventListener('click', (e) => {
@@ -314,14 +364,14 @@ function initializeLightbox() {
             showPreviousImage();
         });
     }
-    
+
     if (lightboxNext) {
         lightboxNext.addEventListener('click', (e) => {
             e.stopPropagation();
             showNextImage();
         });
     }
-    
+
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
         if (lightbox.classList.contains('active')) {
@@ -338,13 +388,13 @@ function initializeLightbox() {
 
 function openLightbox(index) {
     if (galleryImages.length === 0) return;
-    
+
     const lightbox = document.getElementById('lightbox');
     const lightboxImage = document.getElementById('lightboxImage');
-    
+
     if (index < 0) index = galleryImages.length - 1;
     if (index >= galleryImages.length) index = 0;
-    
+
     currentImageIndex = index;
     lightboxImage.src = galleryImages[currentImageIndex];
     lightboxImage.alt = `Gallery image ${currentImageIndex + 1}`;
@@ -395,7 +445,7 @@ function initializeAnimations() {
     }, observerOptions);
 
     const animateElements = document.querySelectorAll('.service-card, .feature, .gallery-item, .contact-item, .master-card, .review-card');
-    
+
     animateElements.forEach((el, index) => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';

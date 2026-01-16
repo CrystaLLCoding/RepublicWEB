@@ -14,7 +14,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'republic-barbershop-secret-key-202
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
 app.use('/uploads', express.static('uploads'));
 
 // Ensure uploads directory exists
@@ -36,12 +35,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit (increased from 5MB)
     fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif|webp/;
         const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
         const mimetype = allowedTypes.test(file.mimetype);
-        
+
         if (mimetype && extname) {
             return cb(null, true);
         } else {
@@ -111,6 +110,21 @@ function initializeDatabase() {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
+    // Bookings table
+    db.run(`CREATE TABLE IF NOT EXISTS bookings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_name TEXT NOT NULL,
+        client_phone TEXT NOT NULL,
+        client_email TEXT,
+        service TEXT NOT NULL,
+        master TEXT,
+        booking_date TEXT NOT NULL,
+        booking_time TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        notes TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
     // Admin users table
     db.run(`CREATE TABLE IF NOT EXISTS admin_users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -144,7 +158,8 @@ function initializeDatabase() {
         { key: 'hours', value: 'Пн - Вс: 10:00 - 20:00' },
         { key: 'instagram', value: '' },
         { key: 'telegram', value: '' },
-        { key: 'facebook', value: '' }
+        { key: 'telegram_token', value: '' },
+        { key: 'telegram_chat_id', value: '' }
     ];
 
     defaultSettings.forEach(setting => {
@@ -203,10 +218,23 @@ app.get('/api/services', (req, res) => {
 app.post('/api/services', authenticateToken, (req, res) => {
     const { name, description, price, duration, icon } = req.body;
 
+    // Validation
+    if (!name || !price || !duration) {
+        return res.status(400).json({ error: 'Missing required fields: name, price, duration' });
+    }
+
+    if (typeof price !== 'number' || price <= 0) {
+        return res.status(400).json({ error: 'Price must be a positive number' });
+    }
+
+    if (typeof duration !== 'number' || duration <= 0) {
+        return res.status(400).json({ error: 'Duration must be a positive number' });
+    }
+
     db.run(
         'INSERT INTO services (name, description, price, duration, icon) VALUES (?, ?, ?, ?, ?)',
         [name, description, price, duration, icon],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
@@ -219,10 +247,23 @@ app.put('/api/services/:id', authenticateToken, (req, res) => {
     const { name, description, price, duration, icon } = req.body;
     const id = req.params.id;
 
+    // Validation
+    if (!name || !price || !duration) {
+        return res.status(400).json({ error: 'Missing required fields: name, price, duration' });
+    }
+
+    if (typeof price !== 'number' || price <= 0) {
+        return res.status(400).json({ error: 'Price must be a positive number' });
+    }
+
+    if (typeof duration !== 'number' || duration <= 0) {
+        return res.status(400).json({ error: 'Duration must be a positive number' });
+    }
+
     db.run(
         'UPDATE services SET name = ?, description = ?, price = ?, duration = ?, icon = ? WHERE id = ?',
         [name, description, price, duration, icon, id],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
@@ -237,7 +278,7 @@ app.put('/api/services/:id', authenticateToken, (req, res) => {
 app.delete('/api/services/:id', authenticateToken, (req, res) => {
     const id = req.params.id;
 
-    db.run('DELETE FROM services WHERE id = ?', [id], function(err) {
+    db.run('DELETE FROM services WHERE id = ?', [id], function (err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -262,10 +303,19 @@ app.get('/api/masters', (req, res) => {
 app.post('/api/masters', authenticateToken, (req, res) => {
     const { name, specialty, experience, description, icon } = req.body;
 
+    // Validation
+    if (!name) {
+        return res.status(400).json({ error: 'Missing required field: name' });
+    }
+
+    if (experience && (typeof experience !== 'number' || experience < 0)) {
+        return res.status(400).json({ error: 'Experience must be a non-negative number' });
+    }
+
     db.run(
         'INSERT INTO masters (name, specialty, experience, description, icon) VALUES (?, ?, ?, ?, ?)',
         [name, specialty, experience, description, icon],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
@@ -281,7 +331,7 @@ app.put('/api/masters/:id', authenticateToken, (req, res) => {
     db.run(
         'UPDATE masters SET name = ?, specialty = ?, experience = ?, description = ?, icon = ? WHERE id = ?',
         [name, specialty, experience, description, icon, id],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
@@ -296,7 +346,7 @@ app.put('/api/masters/:id', authenticateToken, (req, res) => {
 app.delete('/api/masters/:id', authenticateToken, (req, res) => {
     const id = req.params.id;
 
-    db.run('DELETE FROM masters WHERE id = ?', [id], function(err) {
+    db.run('DELETE FROM masters WHERE id = ?', [id], function (err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -325,7 +375,7 @@ app.post('/api/gallery', authenticateToken, upload.single('image'), (req, res) =
 
     const imageUrl = `/uploads/${req.file.filename}`;
 
-    db.run('INSERT INTO gallery (image_url) VALUES (?)', [imageUrl], function(err) {
+    db.run('INSERT INTO gallery (image_url) VALUES (?)', [imageUrl], function (err) {
         if (err) {
             // Delete uploaded file if database insert fails
             fs.unlinkSync(req.file.path);
@@ -348,7 +398,7 @@ app.delete('/api/gallery/:id', authenticateToken, (req, res) => {
         }
 
         // Delete from database
-        db.run('DELETE FROM gallery WHERE id = ?', [id], function(err) {
+        db.run('DELETE FROM gallery WHERE id = ?', [id], function (err) {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
@@ -378,10 +428,19 @@ app.get('/api/reviews', (req, res) => {
 app.post('/api/reviews', authenticateToken, (req, res) => {
     const { author, date, rating, text, avatar } = req.body;
 
+    // Validation
+    if (!author || !date || !rating || !text) {
+        return res.status(400).json({ error: 'Missing required fields: author, date, rating, text' });
+    }
+
+    if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: 'Rating must be a number between 1 and 5' });
+    }
+
     db.run(
         'INSERT INTO reviews (author, date, rating, text, avatar) VALUES (?, ?, ?, ?, ?)',
         [author, date, rating, text, avatar],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
@@ -393,7 +452,7 @@ app.post('/api/reviews', authenticateToken, (req, res) => {
 app.delete('/api/reviews/:id', authenticateToken, (req, res) => {
     const id = req.params.id;
 
-    db.run('DELETE FROM reviews WHERE id = ?', [id], function(err) {
+    db.run('DELETE FROM reviews WHERE id = ?', [id], function (err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -401,6 +460,87 @@ app.delete('/api/reviews/:id', authenticateToken, (req, res) => {
             return res.status(404).json({ error: 'Review not found' });
         }
         res.json({ message: 'Review deleted successfully' });
+    });
+});
+
+// ============ CONTACT ROUTE ============
+
+app.post('/api/contact', (req, res) => {
+    const { name, phone, email, message } = req.body;
+
+    if (!name || !phone) {
+        return res.status(400).json({ error: 'Missing required fields: name, phone' });
+    }
+
+    // Get Telegram settings
+    db.all('SELECT key, value FROM settings WHERE key IN (?, ?)', ['telegram_token', 'telegram_chat_id'], (err, rows) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        const settings = {};
+        rows.forEach(row => settings[row.key] = row.value);
+
+        if (settings.telegram_token && settings.telegram_chat_id) {
+            // Format message for Telegram
+            const telegramMessage = `
+📩 *Новая заявка с сайта*
+
+👤 *Имя:* ${name}
+📞 *Телефон:* ${phone}
+📧 *Email:* ${email || 'Не указан'}
+💬 *Сообщение:*
+${message || 'Без сообщения'}
+            `;
+
+            // Send to Telegram using built-in https module
+            const https = require('https');
+            const data = JSON.stringify({
+                chat_id: settings.telegram_chat_id,
+                text: telegramMessage,
+                parse_mode: 'Markdown'
+            });
+
+            const options = {
+                hostname: 'api.telegram.org',
+                port: 443,
+                path: `/bot${settings.telegram_token}/sendMessage`,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(data)
+                }
+            };
+
+            const reqTelegram = https.request(options, (resTelegram) => {
+                let responseData = '';
+                resTelegram.on('data', (chunk) => {
+                    responseData += chunk;
+                });
+
+                resTelegram.on('end', () => {
+                    if (resTelegram.statusCode === 200) {
+                        res.json({ message: 'Message sent successfully' });
+                    } else {
+                        console.error('Telegram API error:', responseData);
+                        // Still return success to frontend user, but log error
+                        res.json({ message: 'Message saved but failed to send notification' });
+                    }
+                });
+            });
+
+            reqTelegram.on('error', (e) => {
+                console.error('Telegram request error:', e);
+                res.json({ message: 'Message saved but failed to send notification' });
+            });
+
+            reqTelegram.write(data);
+            reqTelegram.end();
+        } else {
+            console.warn('Telegram settings not configured');
+            res.json({ message: 'Application received (Telegram not configured)' });
+        }
     });
 });
 
@@ -444,10 +584,85 @@ app.put('/api/settings', authenticateToken, (req, res) => {
         });
 });
 
-// Serve static files from root directory
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// ============ BOOKINGS ROUTES ============
+
+app.get('/api/bookings', authenticateToken, (req, res) => {
+    db.all('SELECT * FROM bookings ORDER BY booking_date DESC, booking_time DESC', [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
 });
+
+app.post('/api/bookings', (req, res) => {
+    const { client_name, client_phone, client_email, service, master, booking_date, booking_time, notes } = req.body;
+
+    // Validation
+    if (!client_name || !client_phone || !service || !booking_date || !booking_time) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    db.run(
+        'INSERT INTO bookings (client_name, client_phone, client_email, service, master, booking_date, booking_time, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [client_name, client_phone, client_email, service, master, booking_date, booking_time, notes],
+        function (err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({
+                id: this.lastID,
+                client_name,
+                client_phone,
+                client_email,
+                service,
+                master,
+                booking_date,
+                booking_time,
+                notes,
+                status: 'pending'
+            });
+        }
+    );
+});
+
+app.put('/api/bookings/:id', authenticateToken, (req, res) => {
+    const { status, notes } = req.body;
+    const id = req.params.id;
+
+    db.run(
+        'UPDATE bookings SET status = ?, notes = ? WHERE id = ?',
+        [status, notes, id],
+        function (err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            if (this.changes === 0) {
+                return res.status(404).json({ error: 'Booking not found' });
+            }
+            res.json({ id, status, notes });
+        }
+    );
+});
+
+app.delete('/api/bookings/:id', authenticateToken, (req, res) => {
+    const id = req.params.id;
+
+    db.run('DELETE FROM bookings WHERE id = ?', [id], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+        res.json({ message: 'Booking deleted successfully' });
+    });
+});
+
+// Serve static files (CSS, JS, images) - must be after API routes
+app.use(express.static(__dirname, {
+    index: false // Don't serve index.html automatically
+}));
 
 // Serve static files from root directory
 app.get('/', (req, res) => {
