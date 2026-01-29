@@ -140,12 +140,12 @@ function initializeDatabase() {
             return;
         }
         if (!row) {
-            const hashedPassword = bcrypt.hashSync('admin123', 10);
+            const hashedPassword = bcrypt.hashSync('adminbbrepublic', 10);
             db.run('INSERT INTO admin_users (username, password) VALUES (?, ?)', ['admin', hashedPassword], (err) => {
                 if (err) {
                     console.error('Error creating default admin:', err);
                 } else {
-                    console.log('Default admin user created: admin / admin123');
+                    console.log('Default admin user created: admin / adminbbrepublic');
                 }
             });
         }
