@@ -26,13 +26,13 @@ let lastScroll = 0;
 
 window.addEventListener('scroll', () => {
     const currentScroll = window.pageYOffset;
-    
+
     if (currentScroll > 100 && navbar) {
         navbar.classList.add('scrolled');
     } else if (navbar) {
         navbar.classList.remove('scrolled');
     }
-    
+
     lastScroll = currentScroll;
 });
 
@@ -41,7 +41,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
-        
+
         if (target) {
             const offsetTop = target.offsetTop - 80;
             window.scrollTo({
@@ -58,16 +58,16 @@ const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const name = document.getElementById('name').value;
         const phone = document.getElementById('phone').value;
         const email = document.getElementById('email').value;
         const message = document.getElementById('message').value;
-        
+
         // Here you can send to API if needed
         // For now, just show success message
         alert(`Спасибо, ${name}! Ваша заявка принята. Мы свяжемся с вами по телефону ${phone} в ближайшее время.`);
-        
+
         contactForm.reset();
     });
 }
@@ -95,7 +95,7 @@ async function loadServicesFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/services`);
         if (!response.ok) return;
-        
+
         const services = await response.json();
         if (services.length > 0) {
             const servicesGrid = document.querySelector('.services-grid');
@@ -121,15 +121,21 @@ async function loadMastersFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/masters`);
         if (!response.ok) return;
-        
+
         const masters = await response.json();
         if (masters.length > 0) {
             const mastersGrid = document.querySelector('.masters-grid');
             if (mastersGrid) {
-                mastersGrid.innerHTML = masters.map(master => `
+                mastersGrid.innerHTML = masters.map(master => {
+                    const photoUrl = master.photo_url;
+                    const avatarHtml = photoUrl
+                        ? `<img src="${photoUrl}" alt="${master.name}" class="master-img" style="width:100%; height:100%; object-fit:cover; object-position: center top; border-radius:50%; background-color: #fff; filter: brightness(0.95) contrast(0.95);">`
+                        : `<div class="master-placeholder">${master.icon || '👨‍💼'}</div>`;
+
+                    return `
                     <div class="master-card" data-master="${master.name}">
                         <div class="master-photo">
-                            <div class="master-placeholder">${master.icon || '👨‍💼'}</div>
+                            ${avatarHtml}
                         </div>
                         <h3>${master.name}</h3>
                         <p class="master-specialty">${master.specialty || 'Барбер'}</p>
@@ -137,7 +143,7 @@ async function loadMastersFromAPI() {
                         <div class="master-rating">⭐⭐⭐⭐⭐</div>
                         <p class="master-description">${master.description || ''}</p>
                     </div>
-                `).join('');
+                `}).join('');
             }
         }
     } catch (error) {
@@ -150,7 +156,7 @@ async function loadGalleryFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/gallery`);
         if (!response.ok) return;
-        
+
         const gallery = await response.json();
         if (gallery.length > 0) {
             const galleryGrid = document.querySelector('.gallery-grid');
@@ -163,7 +169,7 @@ async function loadGalleryFromAPI() {
                         </div>
                     `;
                 }).join('');
-                
+
                 // Re-initialize lightbox for new images
                 setTimeout(() => {
                     initializeLightbox();
@@ -180,7 +186,7 @@ async function loadReviewsFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/reviews`);
         if (!response.ok) return;
-        
+
         const reviews = await response.json();
         if (reviews.length > 0) {
             const reviewsGrid = document.querySelector('.reviews-grid');
@@ -212,9 +218,9 @@ async function loadSettingsFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/settings`);
         if (!response.ok) return;
-        
+
         const settings = await response.json();
-        
+
         if (settings.address) {
             const addressEls = document.querySelectorAll('.contact-item');
             if (addressEls[0]) {
@@ -222,7 +228,7 @@ async function loadSettingsFromAPI() {
                 if (addressP) addressP.textContent = settings.address;
             }
         }
-        
+
         if (settings.phone) {
             const phoneEls = document.querySelectorAll('.contact-item');
             if (phoneEls[1]) {
@@ -230,7 +236,7 @@ async function loadSettingsFromAPI() {
                 if (phoneP) phoneP.textContent = settings.phone;
             }
         }
-        
+
         if (settings.hours) {
             const hoursEls = document.querySelectorAll('.contact-item');
             if (hoursEls[2]) {
@@ -238,17 +244,17 @@ async function loadSettingsFromAPI() {
                 if (hoursP) hoursP.textContent = settings.hours;
             }
         }
-        
+
         if (settings.instagram) {
             const instagramLink = document.querySelector('.social-links a:nth-of-type(1)');
             if (instagramLink) instagramLink.href = settings.instagram;
         }
-        
+
         if (settings.telegram) {
             const telegramLink = document.querySelector('.social-links a:nth-of-type(2)');
             if (telegramLink) telegramLink.href = settings.telegram;
         }
-        
+
         if (settings.facebook) {
             const facebookLink = document.querySelector('.social-links a:nth-of-type(3)');
             if (facebookLink) facebookLink.href = settings.facebook;
@@ -277,9 +283,9 @@ function initializeLightbox() {
     const lightboxClose = document.querySelector('.lightbox-close');
     const lightboxPrev = document.querySelector('.lightbox-prev');
     const lightboxNext = document.querySelector('.lightbox-next');
-    
+
     if (!lightbox || !lightboxImage) return;
-    
+
     // Collect all gallery images
     galleryImages = [];
     galleryItems.forEach((item) => {
@@ -288,7 +294,7 @@ function initializeLightbox() {
             galleryImages.push(img.src);
         }
     });
-    
+
     // Add click handlers for gallery items
     galleryItems.forEach((item, index) => {
         const img = item.querySelector('img');
@@ -301,12 +307,12 @@ function initializeLightbox() {
             });
         }
     });
-    
+
     // Close button
     if (lightboxClose) {
         lightboxClose.addEventListener('click', closeLightbox);
     }
-    
+
     // Navigation buttons
     if (lightboxPrev) {
         lightboxPrev.addEventListener('click', (e) => {
@@ -314,14 +320,14 @@ function initializeLightbox() {
             showPreviousImage();
         });
     }
-    
+
     if (lightboxNext) {
         lightboxNext.addEventListener('click', (e) => {
             e.stopPropagation();
             showNextImage();
         });
     }
-    
+
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
         if (lightbox.classList.contains('active')) {
@@ -338,13 +344,13 @@ function initializeLightbox() {
 
 function openLightbox(index) {
     if (galleryImages.length === 0) return;
-    
+
     const lightbox = document.getElementById('lightbox');
     const lightboxImage = document.getElementById('lightboxImage');
-    
+
     if (index < 0) index = galleryImages.length - 1;
     if (index >= galleryImages.length) index = 0;
-    
+
     currentImageIndex = index;
     lightboxImage.src = galleryImages[currentImageIndex];
     lightboxImage.alt = `Gallery image ${currentImageIndex + 1}`;
@@ -395,13 +401,15 @@ function initializeAnimations() {
     }, observerOptions);
 
     const animateElements = document.querySelectorAll('.service-card, .feature, .gallery-item, .contact-item, .master-card, .review-card');
-    
+
     animateElements.forEach((el, index) => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
         el.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
         observer.observe(el);
     });
+
+
 }
 
 

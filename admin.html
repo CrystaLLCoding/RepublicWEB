@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="public/barber_favicon_1769863834448.png">
 </head>
 
 <body>
@@ -77,6 +78,7 @@
                     </a>
                 </nav>
             </aside>
+
 
             <!-- Content Area -->
             <main class="admin-content">
@@ -226,8 +228,17 @@
                     <textarea id="masterDescription" rows="3" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Эмодзи/Аватар</label>
-                    <input type="text" id="masterIcon" placeholder="👨‍💼" required>
+                    <label>Фото мастера</label>
+                    <input type="file" id="masterPhoto" accept="image/*">
+                    <img id="masterPhotoPreview" style="
+                      width:80px;
+                      height:80px;
+                      border-radius:50%;
+                      margin-top:10px;
+                      object-fit:cover;
+                      object-position: center top;
+                      display:none;
+                      border:2px solid #d4af37;">
                 </div>
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <button type="button" class="btn btn-secondary modal-cancel">Отмена</button>
@@ -235,7 +246,7 @@
         </div>
     </div>
 
-    <script src="admin.js"></script>
+    <script src="/public/admin.js"></script>
 </body>
 
 </html>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="public/barber_favicon_1769863834448.png">
 </head>
 
 <body>
@@ -38,16 +39,16 @@
                             <!-- Диагональные полосы -->
                             <g clip-path="url(#circleClip)">
                                 <g transform="translate(16,16)">
-                                    <!-- Красные полосы -->
-                                    <rect x="-16" y="-16" width="32" height="4" fill="#DC143C" transform="rotate(45)" />
-                                    <rect x="-16" y="-8" width="32" height="4" fill="#DC143C" transform="rotate(45)" />
-                                    <rect x="-16" y="0" width="32" height="4" fill="#DC143C" transform="rotate(45)" />
-                                    <rect x="-16" y="8" width="32" height="4" fill="#DC143C" transform="rotate(45)" />
-                                    <!-- Синие полосы -->
-                                    <rect x="-16" y="-12" width="32" height="4" fill="#003366" transform="rotate(45)" />
-                                    <rect x="-16" y="-4" width="32" height="4" fill="#003366" transform="rotate(45)" />
-                                    <rect x="-16" y="4" width="32" height="4" fill="#003366" transform="rotate(45)" />
-                                    <rect x="-16" y="12" width="32" height="4" fill="#003366" transform="rotate(45)" />
+                                    <!-- Золотые полосы -->
+                                    <rect x="-16" y="-16" width="32" height="4" fill="#d4af37" transform="rotate(45)" />
+                                    <rect x="-16" y="-8" width="32" height="4" fill="#d4af37" transform="rotate(45)" />
+                                    <rect x="-16" y="0" width="32" height="4" fill="#d4af37" transform="rotate(45)" />
+                                    <rect x="-16" y="8" width="32" height="4" fill="#d4af37" transform="rotate(45)" />
+                                    <!-- Белые полосы -->
+                                    <rect x="-16" y="-12" width="32" height="4" fill="#FFFFFF" transform="rotate(45)" />
+                                    <rect x="-16" y="-4" width="32" height="4" fill="#FFFFFF" transform="rotate(45)" />
+                                    <rect x="-16" y="4" width="32" height="4" fill="#FFFFFF" transform="rotate(45)" />
+                                    <rect x="-16" y="12" width="32" height="4" fill="#FFFFFF" transform="rotate(45)" />
                                 </g>
                             </g>
                         </svg>
@@ -188,43 +189,14 @@
                 <h2>Наши мастера</h2>
                 <p>Профессионалы с многолетним опытом</p>
             </div>
-            <div class="masters-grid">
-                <div class="master-card" data-master="Алексей">
-                    <div class="master-photo">
-                        <div class="master-placeholder">👨‍💼</div>
-                    </div>
-                    <h3>Алексей Иванов</h3>
-                    <p class="master-specialty">Топ-мастер</p>
-                    <p class="master-experience">Опыт: 8 лет</p>
-                    <div class="master-rating">⭐⭐⭐⭐⭐</div>
-                    <p class="master-description">Специализируется на классических и современных стрижках. Мастер
-                        опасного бритья.</p>
-                </div>
-                <div class="master-card" data-master="Дмитрий">
-                    <div class="master-photo">
-                        <div class="master-placeholder">👨‍🎨</div>
-                    </div>
-                    <h3>Дмитрий Смирнов</h3>
-                    <p class="master-specialty">Стилист</p>
-                    <p class="master-experience">Опыт: 6 лет</p>
-                    <div class="master-rating">⭐⭐⭐⭐⭐</div>
-                    <p class="master-description">Эксперт по креативным стрижкам и окрашиванию. Следит за последними
-                        трендами.</p>
-                </div>
-                <div class="master-card" data-master="Максим">
-                    <div class="master-photo">
-                        <div class="master-placeholder">👨‍💇</div>
-                    </div>
-                    <h3>Максим Петров</h3>
-                    <p class="master-specialty">Барбер</p>
-                    <p class="master-experience">Опыт: 5 лет</p>
-                    <div class="master-rating">⭐⭐⭐⭐⭐</div>
-                    <p class="master-description">Мастер по уходу за бородой и классическому бритью. Внимателен к
-                        деталям.</p>
-                </div>
+
+            <div class="masters-grid" id="mastersGrid">
+                <!-- Мастера будут загружаться из базы -->
             </div>
+
         </div>
     </section>
+
 
     <!-- Gallery Section -->
     <section id="gallery" class="gallery">
@@ -384,7 +356,7 @@
     </div>
 
 
-    <script src="script.js"></script>
+    <script src="public/script.js"></script>
 </body>
 
 </html>
