@@ -172,8 +172,12 @@ function initializeDatabase() {
     price INTEGER NOT NULL,
     stock INTEGER NOT NULL DEFAULT 0,
     image_url TEXT,
+    category TEXT DEFAULT 'other',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
+  )`, () => {
+    // migrate existing table — add category column if missing
+    db.run(`ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'other'`, () => {});
+  });
 
   db.run(`CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -664,36 +668,43 @@ app.delete("/api/bookings/:id", authenticateToken, (req, res) => {
    PRODUCTS
    ========================= */
 app.get("/api/products", (req, res) => {
-  db.all("SELECT * FROM products ORDER BY id DESC", [], (err, rows) => {
+  const { category } = req.query;
+  let sql = "SELECT * FROM products ORDER BY id DESC";
+  let params = [];
+  if (category && category !== 'all') {
+    sql = "SELECT * FROM products WHERE category = ? ORDER BY id DESC";
+    params = [category];
+  }
+  db.all(sql, params, (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
 });
 
 app.post("/api/products", authenticateToken, (req, res) => {
-  const { name, description, price, stock, image_url } = req.body;
+  const { name, description, price, stock, image_url, category } = req.body;
   if (!name || price == null) return res.status(400).json({ error: "Missing required fields" });
   
   db.run(
-    "INSERT INTO products (name, description, price, stock, image_url) VALUES (?, ?, ?, ?, ?)",
-    [name, description, price, stock || 0, image_url || null],
+    "INSERT INTO products (name, description, price, stock, image_url, category) VALUES (?, ?, ?, ?, ?, ?)",
+    [name, description, price, stock || 0, image_url || null, category || 'other'],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, name, description, price, stock, image_url });
+      res.json({ id: this.lastID, name, description, price, stock, image_url, category });
     }
   );
 });
 
 app.put("/api/products/:id", authenticateToken, (req, res) => {
-  const { name, description, price, stock, image_url } = req.body;
+  const { name, description, price, stock, image_url, category } = req.body;
   const id = req.params.id;
 
   db.run(
-    "UPDATE products SET name = ?, description = ?, price = ?, stock = ?, image_url = ? WHERE id = ?",
-    [name, description, price, stock, image_url, id],
+    "UPDATE products SET name = ?, description = ?, price = ?, stock = ?, image_url = ?, category = ? WHERE id = ?",
+    [name, description, price, stock, image_url, category || 'other', id],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id, name, description, price, stock, image_url });
+      res.json({ id, name, description, price, stock, image_url, category });
     }
   );
 });

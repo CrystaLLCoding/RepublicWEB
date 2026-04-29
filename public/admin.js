@@ -686,6 +686,7 @@ async function openProductModal(productId = null) {
       qs("#productPrice").value = product.price || 0;
       qs("#productStock").value = product.stock || 0;
       qs("#productPhotoUrl").value = product.image_url || "";
+      if (qs("#productCategory")) qs("#productCategory").value = product.category || "other";
 
       if (product.image_url && prev) {
         prev.src = `${API_BASE_URL}${product.image_url}`;
@@ -694,6 +695,7 @@ async function openProductModal(productId = null) {
     }
   } else {
     qs("#productModalTitle").textContent = "Добавить товар";
+    if (qs("#productCategory")) qs("#productCategory").value = "other";
   }
 
   modal.classList.add("active");
@@ -713,6 +715,7 @@ async function saveProduct() {
   const description = qs("#productDescription").value.trim();
   const price = parseInt(qs("#productPrice").value, 10);
   const stock = parseInt(qs("#productStock").value, 10);
+  const category = qs("#productCategory") ? qs("#productCategory").value : "other";
 
   let image_url = qs("#productPhotoUrl").value || null;
   const file = qs("#productPhoto").files?.[0];
@@ -721,7 +724,7 @@ async function saveProduct() {
     catch (e) { return alert("Ошибка загрузки фото: " + e.message); }
   }
 
-  const productData = { name, description, price, stock, image_url };
+  const productData = { name, description, price, stock, image_url, category };
 
   try {
     if (productId) {

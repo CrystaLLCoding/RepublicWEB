@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ панель - Republic Barbershop</title>
-    <link rel="stylesheet" href="admin.css?v=1.1">
+    <link rel="stylesheet" href="admin.css?v=1.2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -314,13 +314,23 @@
                       display:none;
                       border:2px solid #d4af37;">
                 </div>
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select id="productCategory" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e0e0e0;font-size:1rem;">
+                        <option value="pomade">💈 Помады и воски</option>
+                        <option value="shampoo">🧴 Шампуни</option>
+                        <option value="beard">🧔 Для бороды</option>
+                        <option value="skin">✨ Уход за кожей</option>
+                        <option value="other">📦 Другое</option>
+                    </select>
+                </div>
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <button type="button" class="btn btn-secondary modal-cancel">Отмена</button>
             </form>
         </div>
     </div>
 
-    <script src="/public/admin.js?v=1.1"></script>
+    <script src="/public/admin.js?v=1.2"></script>
 </body>
 
 </html>

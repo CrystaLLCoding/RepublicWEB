@@ -421,6 +421,9 @@ function initializeAnimations() {
 // =========================
 let cart = JSON.parse(localStorage.getItem('barberCart')) || [];
 let productsData = [];
+let currentCategory = 'all';
+const PRODUCTS_PER_PAGE = 8;
+let visibleCount = PRODUCTS_PER_PAGE;
 
 // Load Products
 async function loadProductsFromAPI() {
@@ -429,38 +432,82 @@ async function loadProductsFromAPI() {
         if (!response.ok) return;
 
         productsData = await response.json();
-        const shopGrid = document.getElementById('shopGrid');
-        if (shopGrid && productsData.length > 0) {
-            shopGrid.innerHTML = productsData.map(product => {
-                const photoUrl = product.image_url ? (product.image_url.startsWith('http') ? product.image_url : `${API_BASE_URL}${product.image_url}`) : '';
-                const photoHtml = photoUrl 
-                    ? `<img src="${photoUrl}" alt="${product.name}" class="product-image">`
-                    : `<div class="product-placeholder">🛍️</div>`;
-                
-                const isOutOfStock = product.stock <= 0;
-                const stockClass = isOutOfStock ? 'out-of-stock' : '';
-                const stockText = isOutOfStock ? 'Нет в наличии' : `В наличии: ${product.stock} шт.`;
-                const btnHtml = isOutOfStock 
-                    ? `<button class="btn btn-secondary" disabled>Нет в наличии</button>`
-                    : `<button class="btn btn-primary" onclick="addToCart(${product.id})">В корзину</button>`;
-
-                return `
-                    <div class="product-card">
-                        ${photoHtml}
-                        <div class="product-info">
-                            <h3>${product.name}</h3>
-                            <p>${product.description || ''}</p>
-                            <div class="product-price">${Number(product.price).toLocaleString()} сум</div>
-                            <div class="product-stock ${stockClass}">${stockText}</div>
-                        </div>
-                        ${btnHtml}
-                    </div>
-                `;
-            }).join('');
-        }
+        renderShopProducts();
+        initShopFilters();
         updateCartUI();
     } catch (error) {
         console.error('Error loading products:', error);
+    }
+}
+
+function renderShopProducts() {
+    const shopGrid = document.getElementById('shopGrid');
+    const showMoreWrap = document.getElementById('shopShowMore');
+    if (!shopGrid) return;
+
+    const filtered = currentCategory === 'all'
+        ? productsData
+        : productsData.filter(p => p.category === currentCategory);
+
+    const visible = filtered.slice(0, visibleCount);
+
+    if (filtered.length === 0) {
+        shopGrid.innerHTML = '<p style="text-align:center;color:#888;padding:2rem;">Товаров в этой категории пока нет.</p>';
+        if (showMoreWrap) showMoreWrap.style.display = 'none';
+        return;
+    }
+
+    shopGrid.innerHTML = visible.map(product => {
+        const photoUrl = product.image_url
+            ? (product.image_url.startsWith('http') ? product.image_url : `${API_BASE_URL}${product.image_url}`)
+            : '';
+        const photoHtml = photoUrl
+            ? `<img src="${photoUrl}" alt="${product.name}" class="product-image">`
+            : `<div class="product-placeholder">🛍️</div>`;
+
+        const isOutOfStock = product.stock <= 0;
+        const stockText = isOutOfStock ? 'Нет в наличии' : `В наличии: ${product.stock} шт.`;
+        const btnHtml = isOutOfStock
+            ? `<button class="btn btn-secondary" disabled>Нет в наличии</button>`
+            : `<button class="btn btn-primary" onclick="addToCart(${product.id})">В корзину</button>`;
+
+        return `
+            <div class="product-card${isOutOfStock ? ' out-of-stock' : ''}">
+                ${photoHtml}
+                <div class="product-info">
+                    <h3>${product.name}</h3>
+                    <p>${product.description || ''}</p>
+                    <div class="product-price">${Number(product.price).toLocaleString()} сум</div>
+                    <div class="product-stock${isOutOfStock ? ' out-of-stock-text' : ''}">${stockText}</div>
+                </div>
+                ${btnHtml}
+            </div>
+        `;
+    }).join('');
+
+    if (showMoreWrap) {
+        showMoreWrap.style.display = visibleCount < filtered.length ? 'flex' : 'none';
+    }
+}
+
+function initShopFilters() {
+    const filterBtns = document.querySelectorAll('.shop-filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = btn.dataset.category;
+            visibleCount = PRODUCTS_PER_PAGE;
+            renderShopProducts();
+        });
+    });
+
+    const showMoreBtn = document.getElementById('showMoreBtn');
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener('click', () => {
+            visibleCount += PRODUCTS_PER_PAGE;
+            renderShopProducts();
+        });
     }
 }
 
