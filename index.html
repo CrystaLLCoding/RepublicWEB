@@ -62,6 +62,7 @@
                     <li><a href="#home">Главная</a></li>
                     <li><a href="#about">О нас</a></li>
                     <li><a href="#services">Услуги</a></li>
+                    <li><a href="#shop">Магазин</a></li>
                     <li><a href="#masters">Мастера</a></li>
                     <li><a href="#gallery">Галерея</a></li>
                     <li><a href="#reviews">Отзывы</a></li>
@@ -178,6 +179,19 @@
                     <div class="service-price">от 120 000 сум</div>
                     <div class="service-duration">40 минут</div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shop Section -->
+    <section id="shop" class="shop">
+        <div class="container">
+            <div class="section-header">
+                <h2>Магазин</h2>
+                <p>Профессиональная косметика для ухода за собой</p>
+            </div>
+            <div class="shop-grid" id="shopGrid">
+                <!-- Products will be loaded from API -->
             </div>
         </div>
     </section>
@@ -355,6 +369,54 @@
         </div>
     </div>
 
+    <!-- Floating Cart Button -->
+    <div class="cart-floating-btn" id="cartFloatingBtn" style="display: none;">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-count" id="cartCount">0</span>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="lightbox" id="cartModal">
+        <span class="lightbox-close" id="cartModalClose">&times;</span>
+        <div class="cart-modal-content">
+            <h2 style="color: var(--primary-color); margin-bottom: 1.5rem;">Корзина</h2>
+            <div class="cart-items" id="cartItemsList">
+                <!-- Cart items here -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">Итого: <span id="cartTotalSum">0</span> сум</div>
+                <button class="btn btn-primary" id="checkoutBtn" style="width: 100%; margin-top: 1rem;">Оформить заказ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="lightbox" id="checkoutModal">
+        <span class="lightbox-close" id="checkoutModalClose">&times;</span>
+        <div class="cart-modal-content">
+            <h2 style="color: var(--primary-color); margin-bottom: 1.5rem;">Оформление заказа</h2>
+            <form id="checkoutForm" class="contact-form" style="margin-top: 1rem;">
+                <div class="form-group">
+                    <input type="text" id="checkoutName" placeholder="Ваше имя" required>
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="checkoutPhone" placeholder="Ваш телефон" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="checkoutAddress" placeholder="Адрес доставки (для Яндекс такси)" required>
+                </div>
+                
+                <div class="payment-info-box">
+                    <h3>Оплата переводом</h3>
+                    <p>Переведите сумму <strong><span id="checkoutTotalShow">0</span> сум</strong> на карту:</p>
+                    <div class="card-number-box" id="paymentCardDisplay">Загрузка...</div>
+                    <p style="font-size: 0.85rem; color: var(--text-gray); margin-top: 0.5rem;">После перевода нажмите кнопку ниже. Администратор проверит оплату и отправит заказ на указанный адрес.</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Я оплатил (Подтвердить заказ)</button>
+            </form>
+        </div>
+    </div>
 
     <script src="public/script.js"></script>
 </body>

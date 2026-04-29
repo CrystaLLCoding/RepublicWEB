@@ -23,9 +23,11 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
    ========================= */
 const uploadsDir = path.join(__dirname, "uploads");
 const mastersDir = path.join(uploadsDir, "masters");
+const productsDir = path.join(uploadsDir, "products");
 
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 if (!fs.existsSync(mastersDir)) fs.mkdirSync(mastersDir, { recursive: true });
+if (!fs.existsSync(productsDir)) fs.mkdirSync(productsDir, { recursive: true });
 
 /* =========================
    Multer: Gallery Upload
@@ -70,6 +72,23 @@ const masterStorage = multer.diskStorage({
 const uploadMaster = multer({
   storage: masterStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 2MB
+  fileFilter: imageFilter,
+});
+
+/* =========================
+   Multer: Product Photo Upload
+   ========================= */
+const productStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, productsDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "product-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const uploadProduct = multer({
+  storage: productStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: imageFilter,
 });
 
@@ -146,6 +165,27 @@ function initializeDatabase() {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  db.run(`CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    price INTEGER NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 0,
+    image_url TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_name TEXT NOT NULL,
+    client_phone TEXT NOT NULL,
+    address TEXT,
+    total_amount INTEGER NOT NULL,
+    items TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   db.run(`CREATE TABLE IF NOT EXISTS admin_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -159,16 +199,19 @@ function initializeDatabase() {
       console.error("Error checking admin user:", err);
       return;
     }
+    const hashedPassword = bcrypt.hashSync("republicbbadmin", 10);
     if (!row) {
-      const hashedPassword = bcrypt.hashSync("adminbbrepublic", 10);
       db.run(
         "INSERT INTO admin_users (username, password) VALUES (?, ?)",
         ["admin", hashedPassword],
         (err2) => {
           if (err2) console.error("Error creating default admin:", err2);
-          else console.log("Default admin user created: admin / adminbbrepublic");
+          else console.log("Default admin user created: admin / republicbbadmin");
         }
       );
+    } else {
+      // Sync local password with live site
+      db.run("UPDATE admin_users SET password = ? WHERE username = 'admin'", [hashedPassword]);
     }
   });
 
@@ -181,6 +224,7 @@ function initializeDatabase() {
     { key: "telegram", value: "" },
     { key: "telegram_token", value: "" },
     { key: "telegram_chat_id", value: "" },
+    { key: "payment_card", value: "8600 0000 0000 0000" },
   ];
 
   defaultSettings.forEach((s) => {
@@ -602,6 +646,160 @@ app.delete("/api/bookings/:id", authenticateToken, (req, res) => {
     if (this.changes === 0) return res.status(404).json({ error: "Booking not found" });
     res.json({ message: "Booking deleted successfully" });
   });
+});
+
+/* =========================
+   PRODUCTS
+   ========================= */
+app.get("/api/products", (req, res) => {
+  db.all("SELECT * FROM products ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+app.post("/api/products", authenticateToken, (req, res) => {
+  const { name, description, price, stock, image_url } = req.body;
+  if (!name || price == null) return res.status(400).json({ error: "Missing required fields" });
+  
+  db.run(
+    "INSERT INTO products (name, description, price, stock, image_url) VALUES (?, ?, ?, ?, ?)",
+    [name, description, price, stock || 0, image_url || null],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID, name, description, price, stock, image_url });
+    }
+  );
+});
+
+app.put("/api/products/:id", authenticateToken, (req, res) => {
+  const { name, description, price, stock, image_url } = req.body;
+  const id = req.params.id;
+
+  db.run(
+    "UPDATE products SET name = ?, description = ?, price = ?, stock = ?, image_url = ? WHERE id = ?",
+    [name, description, price, stock, image_url, id],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id, name, description, price, stock, image_url });
+    }
+  );
+});
+
+app.delete("/api/products/:id", authenticateToken, (req, res) => {
+  const id = req.params.id;
+  db.get("SELECT image_url FROM products WHERE id = ?", [id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    db.run("DELETE FROM products WHERE id = ?", [id], function (err2) {
+      if (err2) return res.status(500).json({ error: err2.message });
+      if (row && row.image_url) {
+        const filePath = path.join(__dirname, row.image_url.replace(/^\//, ""));
+        if (fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch (e) {}
+        }
+      }
+      res.json({ message: "Product deleted successfully" });
+    });
+  });
+});
+
+app.post("/api/upload-product", authenticateToken, uploadProduct.single("photo"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+  res.json({ success: true, path: `/uploads/products/${req.file.filename}` });
+});
+
+/* =========================
+   ORDERS
+   ========================= */
+app.get("/api/orders", authenticateToken, (req, res) => {
+  db.all("SELECT * FROM orders ORDER BY created_at DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+app.put("/api/orders/:id", authenticateToken, (req, res) => {
+  const { status } = req.body;
+  const id = req.params.id;
+  db.run("UPDATE orders SET status = ? WHERE id = ?", [status, id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ id, status });
+  });
+});
+
+app.post("/api/orders", (req, res) => {
+  const { client_name, client_phone, address, total_amount, items } = req.body;
+
+  if (!client_name || !client_phone || !total_amount || !items) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const itemsString = JSON.stringify(items);
+
+  db.run(
+    "INSERT INTO orders (client_name, client_phone, address, total_amount, items) VALUES (?, ?, ?, ?, ?)",
+    [client_name, client_phone, address || "", total_amount, itemsString],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      
+      const orderId = this.lastID;
+
+      // Update product stock
+      items.forEach(item => {
+        db.run("UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?", [item.quantity, item.id, item.quantity]);
+      });
+
+      // Send Telegram Notification
+      db.all("SELECT key, value FROM settings WHERE key IN (?, ?)", ["telegram_token", "telegram_chat_id"], (err2, rows) => {
+        if (!err2) {
+          const settings = {};
+          rows.forEach((r) => (settings[r.key] = r.value));
+          
+          if (settings.telegram_token && settings.telegram_chat_id) {
+            let itemsText = items.map(i => `- ${i.name} (${i.quantity} шт.) x ${i.price} сум`).join("\\n");
+            
+            const telegramMessage = `
+🛍 *Новый заказ в магазине!* (№${orderId})
+
+👤 *Имя:* ${client_name}
+📞 *Телефон:* ${client_phone}
+📍 *Адрес доставки:* ${address || "Не указан"}
+💰 *Сумма:* ${total_amount.toLocaleString()} сум
+💳 *Оплата:* Перевод на карту. (Проверьте поступление)
+
+📦 *Товары:*
+${itemsText}
+            `;
+
+            const https = require("https");
+            const data = JSON.stringify({
+              chat_id: settings.telegram_chat_id,
+              text: telegramMessage,
+              parse_mode: "Markdown",
+            });
+
+            const options = {
+              hostname: "api.telegram.org",
+              port: 443,
+              path: `/bot${settings.telegram_token}/sendMessage`,
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Content-Length": Buffer.byteLength(data),
+              },
+            };
+
+            const reqTelegram = https.request(options);
+            reqTelegram.on('error', () => {});
+            reqTelegram.write(data);
+            reqTelegram.end();
+          }
+        }
+      });
+
+      res.json({ id: orderId, message: "Order placed successfully" });
+    }
+  );
 });
 
 /* =========================

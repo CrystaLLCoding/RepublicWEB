@@ -250,7 +250,9 @@ body {
 }
 
 /* Services List */
-.services-list {
+.services-list,
+.products-list,
+.orders-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;

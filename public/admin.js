@@ -192,6 +192,8 @@ function closeModal(modalId) {
 ========================= */
 function initializeSections() {
   initializeServices();
+  initializeProducts();
+  initializeOrders();
   initializeGallery();
   initializeMasters();
   initializeReviews();
@@ -601,8 +603,212 @@ async function deleteReview(id) {
 }
 
 /* =========================
+   PRODUCTS
+   ========================= */
+function initializeProducts() {
+  qs("#addProductBtn").addEventListener("click", () => openProductModal());
+  qs("#productForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await saveProduct();
+  });
+  
+  const input = qs("#productPhoto");
+  input?.addEventListener("change", () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const prev = qs("#productPhotoPreview");
+    if (prev) {
+      prev.src = URL.createObjectURL(file);
+      prev.style.display = "block";
+    }
+  });
+}
+
+async function loadProducts() {
+  const products = await apiCall("/products");
+  renderProducts(products);
+}
+
+function renderProducts(products) {
+  const container = qs("#productsList");
+  if (!products.length) {
+    container.innerHTML = '<p style="color: var(--text-gray);">Товаров пока нет. Добавьте первый товар.</p>';
+    return;
+  }
+
+  container.innerHTML = products.map(p => {
+    const photo = p.image_url ? `<img src="${API_BASE_URL}${p.image_url}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;border:2px solid #d4af37;" />`
+      : `<div class="service-icon-admin">🛍️</div>`;
+
+    return `
+      <div class="service-item-admin" style="align-items: center;">
+        ${photo}
+        <div class="service-info-admin" style="margin-left: 15px;">
+          <h3>${p.name}</h3>
+          <p>${p.description || ""}</p>
+          <div class="service-price-admin">${Number(p.price).toLocaleString()} сум • В наличии: ${p.stock} шт.</div>
+        </div>
+        <div class="service-actions">
+          <button class="btn btn-primary btn-sm" onclick="editProduct(${p.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function openProductModal(productId = null) {
+  const modal = qs("#productModal");
+  qs("#productForm").reset();
+  qs("#productId").value = "";
+  
+  const prev = qs("#productPhotoPreview");
+  if (prev) { prev.src = ""; prev.style.display = "none"; }
+  if (qs("#productPhoto")) qs("#productPhoto").value = "";
+  
+  // store existing image url if editing
+  if (!qs("#productPhotoUrl")) {
+    const inp = document.createElement("input");
+    inp.type = "hidden";
+    inp.id = "productPhotoUrl";
+    qs("#productForm").appendChild(inp);
+  }
+  qs("#productPhotoUrl").value = "";
+
+  if (productId) {
+    const products = await apiCall("/products");
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      qs("#productModalTitle").textContent = "Редактировать товар";
+      qs("#productId").value = product.id;
+      qs("#productName").value = product.name || "";
+      qs("#productDescription").value = product.description || "";
+      qs("#productPrice").value = product.price || 0;
+      qs("#productStock").value = product.stock || 0;
+      qs("#productPhotoUrl").value = product.image_url || "";
+
+      if (product.image_url && prev) {
+        prev.src = `${API_BASE_URL}${product.image_url}`;
+        prev.style.display = "block";
+      }
+    }
+  } else {
+    qs("#productModalTitle").textContent = "Добавить товар";
+  }
+
+  modal.classList.add("active");
+}
+
+async function uploadProductPhoto(file) {
+  const formData = new FormData();
+  formData.append("photo", file);
+  const data = await apiCall("/upload-product", { method: "POST", body: formData });
+  if (!data.path) throw new Error("Сервер не вернул путь к файлу");
+  return data.path;
+}
+
+async function saveProduct() {
+  const productId = qs("#productId").value;
+  const name = qs("#productName").value.trim();
+  const description = qs("#productDescription").value.trim();
+  const price = parseInt(qs("#productPrice").value, 10);
+  const stock = parseInt(qs("#productStock").value, 10);
+
+  let image_url = qs("#productPhotoUrl").value || null;
+  const file = qs("#productPhoto").files?.[0];
+  if (file) {
+    try { image_url = await uploadProductPhoto(file); }
+    catch (e) { return alert("Ошибка загрузки фото: " + e.message); }
+  }
+
+  const productData = { name, description, price, stock, image_url };
+
+  try {
+    if (productId) {
+      await apiCall(`/products/${productId}`, { method: "PUT", body: JSON.stringify(productData) });
+    } else {
+      await apiCall("/products", { method: "POST", body: JSON.stringify(productData) });
+    }
+    await loadProducts();
+    closeModal("productModal");
+  } catch (error) {
+    alert("Ошибка сохранения товара: " + error.message);
+  }
+}
+
+window.editProduct = (id) => openProductModal(id);
+window.deleteProduct = async (id) => {
+  if (!confirm("Удалить этот товар?")) return;
+  try {
+    await apiCall(`/products/${id}`, { method: "DELETE" });
+    await loadProducts();
+  } catch (error) {
+    alert("Ошибка удаления товара: " + error.message);
+  }
+};
+
+/* =========================
+   ORDERS
+   ========================= */
+function initializeOrders() {}
+
+async function loadOrders() {
+  const orders = await apiCall("/orders");
+  renderOrders(orders);
+}
+
+function renderOrders(orders) {
+  const container = qs("#ordersList");
+  if (!orders.length) {
+    container.innerHTML = '<p style="color: var(--text-gray);">Заказов пока нет.</p>';
+    return;
+  }
+
+  container.innerHTML = orders.map(order => {
+    const items = JSON.parse(order.items || "[]");
+    const itemsList = items.map(i => `<li>${i.name} (${i.quantity} шт.) - ${i.price * i.quantity} сум</li>`).join("");
+    
+    return `
+      <div class="service-item-admin" style="flex-direction: column; align-items: stretch; border-left: 4px solid ${order.status === 'pending' ? '#d4af37' : '#4caf50'};">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="margin: 0;">Заказ №${order.id} <span style="font-size: 0.8rem; color: #888; font-weight: normal;">${new Date(order.created_at).toLocaleString()}</span></h3>
+          <select onchange="updateOrderStatus(${order.id}, this.value)" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc; background: #fff;">
+            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>В ожидании</option>
+            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Отправлен</option>
+            <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Завершен</option>
+            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Отменен</option>
+          </select>
+        </div>
+        
+        <div style="display: flex; gap: 20px; font-size: 0.9rem;">
+          <div style="flex: 1;">
+            <p style="margin: 0 0 5px;"><strong>Клиент:</strong> ${order.client_name}</p>
+            <p style="margin: 0 0 5px;"><strong>Телефон:</strong> ${order.client_phone}</p>
+            <p style="margin: 0 0 5px;"><strong>Адрес:</strong> ${order.address || "Не указан"}</p>
+          </div>
+          <div style="flex: 1;">
+            <p style="margin: 0 0 5px;"><strong>Сумма:</strong> <span style="color: #d4af37; font-weight: bold;">${Number(order.total_amount).toLocaleString()} сум</span></p>
+            <p style="margin: 0 0 5px;"><strong>Состав заказа:</strong></p>
+            <ul style="margin: 0; padding-left: 20px;">${itemsList}</ul>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+window.updateOrderStatus = async (id, status) => {
+  try {
+    await apiCall(`/orders/${id}`, { method: "PUT", body: JSON.stringify({ status }) });
+    alert("Статус заказа обновлен");
+  } catch (error) {
+    alert("Ошибка обновления статуса: " + error.message);
+  }
+};
+
+/* =========================
    SETTINGS
-========================= */
+   ========================= */
 function initializeSettings() {
   qs("#saveSettingsBtn").addEventListener("click", saveSettings);
 }
