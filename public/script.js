@@ -1,6 +1,18 @@
 // API Base URL
 const API_BASE_URL = window.location.origin;
 
+// Telegram Mini App — auto scroll to shop section
+if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+    window.addEventListener('load', () => {
+        const shopSection = document.getElementById('shop');
+        if (shopSection) {
+            shopSection.scrollIntoView({ behavior: 'instant' });
+        }
+    });
+}
+
 // Mobile Menu Toggle
 const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('navMenu');
