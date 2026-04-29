@@ -278,6 +278,18 @@ app.post("/api/upload-master-photo", authenticateToken, uploadMaster.single("pho
 });
 
 /* =========================
+   PRODUCTS PHOTO UPLOAD
+   ========================= */
+app.post("/api/upload-product", authenticateToken, uploadProduct.single("photo"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Файл не загружен" });
+
+  res.json({
+    success: true,
+    path: `/uploads/products/${req.file.filename}`,
+  });
+});
+
+/* =========================
    SERVICES
    ========================= */
 app.get("/api/services", (req, res) => {
