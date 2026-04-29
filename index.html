@@ -408,16 +408,19 @@
         <div class="cart-modal-content">
             <h2 style="color: var(--primary-color); margin-bottom: 1.5rem;">Оформление заказа</h2>
             <form id="checkoutForm" style="margin-top: 1rem;">
-                <div class="form-group">
-                    <input type="text" id="checkoutName" placeholder="Ваше имя" required
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label style="display:block;font-weight:600;color:#1a1a1a;margin-bottom:6px;font-size:0.9rem;">👤 Ваше имя *</label>
+                    <input type="text" id="checkoutName" placeholder="Например: Шерзод" required
                         style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:1rem;color:#1a1a1a;background:#fff;outline:none;box-sizing:border-box;">
                 </div>
-                <div class="form-group">
-                    <input type="tel" id="checkoutPhone" placeholder="Ваш телефон" required
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label style="display:block;font-weight:600;color:#1a1a1a;margin-bottom:6px;font-size:0.9rem;">📞 Номер телефона *</label>
+                    <input type="tel" id="checkoutPhone" placeholder="+998 90 000 00 00" required
                         style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:1rem;color:#1a1a1a;background:#fff;outline:none;box-sizing:border-box;">
                 </div>
-                <div class="form-group">
-                    <input type="text" id="checkoutAddress" placeholder="Адрес доставки (для Яндекс такси)" required
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label style="display:block;font-weight:600;color:#1a1a1a;margin-bottom:6px;font-size:0.9rem;">📍 Адрес доставки (Яндекс такси)</label>
+                    <input type="text" id="checkoutAddress" placeholder="ул. Амира Темура, д. 10, кв. 5"
                         style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:1rem;color:#1a1a1a;background:#fff;outline:none;box-sizing:border-box;">
                 </div>
                 
