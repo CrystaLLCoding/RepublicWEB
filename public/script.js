@@ -482,18 +482,15 @@ function renderShopProducts() {
         const photoUrl = product.image_url
             ? (product.image_url.startsWith('http') ? product.image_url : `${API_BASE_URL}${product.image_url}`)
             : '';
-        const safeName = escapeHtml(product.name);
-        const rawDesc =
-            product.description != null && product.description !== undefined
-                ? String(product.description).trim()
-                : '';
-        const descBlock = rawDesc
-            ? `<p class="product-description">${escapeHtml(rawDesc)}</p>`
-            : '';
+        const displayName = [product.name, product.description]
+            .filter((v) => v != null && String(v).trim())
+            .join('\n')
+            .trim();
+        const safeName = escapeHtml(displayName);
 
         const photoHtml = photoUrl
-            ? `<img src="${photoUrl}" alt="${safeName}" class="product-image">`
-            : `<div class="product-placeholder">🛍️</div>`;
+            ? `<div class="product-media"><img src="${photoUrl}" alt="${safeName}" class="product-image"></div>`
+            : `<div class="product-media"><div class="product-placeholder">🛍️</div></div>`;
 
         const isOutOfStock = product.stock <= 0;
         const stockText = isOutOfStock ? 'Нет в наличии' : `В наличии: ${product.stock} шт.`;
@@ -505,8 +502,7 @@ function renderShopProducts() {
             <div class="product-card${isOutOfStock ? ' out-of-stock' : ''}">
                 ${photoHtml}
                 <div class="product-info">
-                    <h3>${safeName}</h3>
-                    ${descBlock}
+                    <h3 class="product-title">${safeName}</h3>
                     <div class="product-price">${Number(product.price).toLocaleString()} сум</div>
                     <div class="product-stock${isOutOfStock ? ' out-of-stock-text' : ''}">${stockText}</div>
                 </div>
@@ -518,6 +514,43 @@ function renderShopProducts() {
     if (showMoreWrap) {
         showMoreWrap.style.display = visibleCount < filtered.length ? 'flex' : 'none';
     }
+
+    animateProductCards();
+}
+
+let productCardsObserver = null;
+
+function animateProductCards() {
+    const cards = document.querySelectorAll('#shopGrid .product-card');
+    if (!cards.length) return;
+
+    if (productCardsObserver) {
+        productCardsObserver.disconnect();
+        productCardsObserver = null;
+    }
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+        cards.forEach((card) => card.classList.add('product-card--visible'));
+        return;
+    }
+
+    productCardsObserver = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('product-card--visible');
+                productCardsObserver.unobserve(entry.target);
+            });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    cards.forEach((card, index) => {
+        card.classList.remove('product-card--visible');
+        card.style.transitionDelay = `${Math.min(index, 10) * 0.07}s`;
+        productCardsObserver.observe(card);
+    });
 }
 
 function initShopFilters() {

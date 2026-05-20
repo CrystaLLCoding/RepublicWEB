@@ -644,8 +644,7 @@ function renderProducts(products) {
       <div class="service-item-admin" style="align-items: center;">
         ${photo}
         <div class="service-info-admin" style="margin-left: 15px;">
-          <h3>${p.name}</h3>
-          <p>${p.description || ""}</p>
+          <h3 style="white-space:pre-line;font-size:1rem;">${p.name}</h3>
           <div class="service-price-admin">${Number(p.price).toLocaleString()} сум • В наличии: ${p.stock} шт.</div>
         </div>
         <div class="service-actions">
@@ -681,8 +680,8 @@ async function openProductModal(productId = null) {
     if (product) {
       qs("#productModalTitle").textContent = "Редактировать товар";
       qs("#productId").value = product.id;
-      qs("#productName").value = product.name || "";
-      qs("#productDescription").value = product.description || "";
+      const nameParts = [product.name, product.description].filter(Boolean);
+      qs("#productName").value = nameParts.join("\n").trim();
       qs("#productPrice").value = product.price || 0;
       qs("#productStock").value = product.stock || 0;
       qs("#productPhotoUrl").value = product.image_url || "";
@@ -712,7 +711,6 @@ async function uploadProductPhoto(file) {
 async function saveProduct() {
   const productId = qs("#productId").value;
   const name = qs("#productName").value.trim();
-  const description = qs("#productDescription").value.trim();
   const price = parseInt(qs("#productPrice").value, 10);
   const stock = parseInt(qs("#productStock").value, 10);
   const category = qs("#productCategory") ? qs("#productCategory").value : "other";
@@ -724,7 +722,7 @@ async function saveProduct() {
     catch (e) { return alert("Ошибка загрузки фото: " + e.message); }
   }
 
-  const productData = { name, description, price, stock, image_url, category };
+  const productData = { name, description: null, price, stock, image_url, category };
 
   try {
     if (productId) {
@@ -853,6 +851,8 @@ async function loadData() {
   try {
     await Promise.all([
       loadServices(),
+      loadProducts(),
+      loadOrders(),
       loadGallery(),
       loadMasters(),
       loadReviews(),
