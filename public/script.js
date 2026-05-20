@@ -437,6 +437,15 @@ let currentCategory = 'all';
 const PRODUCTS_PER_PAGE = 8;
 let visibleCount = PRODUCTS_PER_PAGE;
 
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 // Load Products
 async function loadProductsFromAPI() {
     try {
@@ -473,8 +482,17 @@ function renderShopProducts() {
         const photoUrl = product.image_url
             ? (product.image_url.startsWith('http') ? product.image_url : `${API_BASE_URL}${product.image_url}`)
             : '';
+        const safeName = escapeHtml(product.name);
+        const rawDesc =
+            product.description != null && product.description !== undefined
+                ? String(product.description).trim()
+                : '';
+        const descBlock = rawDesc
+            ? `<p class="product-description">${escapeHtml(rawDesc)}</p>`
+            : '';
+
         const photoHtml = photoUrl
-            ? `<img src="${photoUrl}" alt="${product.name}" class="product-image">`
+            ? `<img src="${photoUrl}" alt="${safeName}" class="product-image">`
             : `<div class="product-placeholder">🛍️</div>`;
 
         const isOutOfStock = product.stock <= 0;
@@ -487,8 +505,8 @@ function renderShopProducts() {
             <div class="product-card${isOutOfStock ? ' out-of-stock' : ''}">
                 ${photoHtml}
                 <div class="product-info">
-                    <h3>${product.name}</h3>
-                    <p>${product.description || ''}</p>
+                    <h3>${safeName}</h3>
+                    ${descBlock}
                     <div class="product-price">${Number(product.price).toLocaleString()} сум</div>
                     <div class="product-stock${isOutOfStock ? ' out-of-stock-text' : ''}">${stockText}</div>
                 </div>
