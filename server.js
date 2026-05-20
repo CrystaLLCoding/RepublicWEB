@@ -272,24 +272,30 @@ app.post("/api/auth/login", (req, res) => {
 /* =========================
    MASTERS PHOTO UPLOAD
    ========================= */
-app.post("/api/upload-master-photo", authenticateToken, uploadMaster.single("photo"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "Файл не загружен" });
+app.post("/api/upload-master-photo", authenticateToken, (req, res) => {
+  uploadMaster.single("photo")(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message || "Ошибка загрузки файла" });
+    if (!req.file) return res.status(400).json({ error: "Файл не загружен" });
 
-  res.json({
-    success: true,
-    path: `/uploads/masters/${req.file.filename}`,
+    res.json({
+      success: true,
+      path: `/uploads/masters/${req.file.filename}`,
+    });
   });
 });
 
 /* =========================
    PRODUCTS PHOTO UPLOAD
    ========================= */
-app.post("/api/upload-product", authenticateToken, uploadProduct.single("photo"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "Файл не загружен" });
+app.post("/api/upload-product", authenticateToken, (req, res) => {
+  uploadProduct.single("photo")(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message || "Ошибка загрузки файла" });
+    if (!req.file) return res.status(400).json({ error: "Файл не загружен" });
 
-  res.json({
-    success: true,
-    path: `/uploads/products/${req.file.filename}`,
+    res.json({
+      success: true,
+      path: `/uploads/products/${req.file.filename}`,
+    });
   });
 });
 
@@ -684,6 +690,12 @@ app.get("/api/products", (req, res) => {
 app.post("/api/products", authenticateToken, (req, res) => {
   const { name, description, price, stock, image_url, category } = req.body;
   if (!name || price == null) return res.status(400).json({ error: "Missing required fields" });
+  if (typeof price !== "number" || Number.isNaN(price) || price <= 0) {
+    return res.status(400).json({ error: "Price must be a positive number" });
+  }
+  if (stock != null && (typeof stock !== "number" || Number.isNaN(stock) || stock < 0)) {
+    return res.status(400).json({ error: "Stock must be a non-negative number" });
+  }
   
   db.run(
     "INSERT INTO products (name, description, price, stock, image_url, category) VALUES (?, ?, ?, ?, ?, ?)",
@@ -698,6 +710,13 @@ app.post("/api/products", authenticateToken, (req, res) => {
 app.put("/api/products/:id", authenticateToken, (req, res) => {
   const { name, description, price, stock, image_url, category } = req.body;
   const id = req.params.id;
+  if (!name || price == null) return res.status(400).json({ error: "Missing required fields" });
+  if (typeof price !== "number" || Number.isNaN(price) || price <= 0) {
+    return res.status(400).json({ error: "Price must be a positive number" });
+  }
+  if (stock != null && (typeof stock !== "number" || Number.isNaN(stock) || stock < 0)) {
+    return res.status(400).json({ error: "Stock must be a non-negative number" });
+  }
 
   db.run(
     "UPDATE products SET name = ?, description = ?, price = ?, stock = ?, image_url = ?, category = ? WHERE id = ?",
@@ -724,11 +743,6 @@ app.delete("/api/products/:id", authenticateToken, (req, res) => {
       res.json({ message: "Product deleted successfully" });
     });
   });
-});
-
-app.post("/api/upload-product", authenticateToken, uploadProduct.single("photo"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  res.json({ success: true, path: `/uploads/products/${req.file.filename}` });
 });
 
 /* =========================
