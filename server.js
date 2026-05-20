@@ -6,6 +6,7 @@ const fs = require("fs");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const https = require("https");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -104,6 +105,42 @@ const db = new sqlite3.Database(dbPath, (err) => {
     initializeDatabase();
   }
 });
+
+function parseTelegramChatIds(rawValue) {
+  if (!rawValue) return [];
+  return String(rawValue)
+    .split(/[,\s;]+/)
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
+
+function sendTelegramMessageToMany(token, chatIds, text) {
+  if (!token || !Array.isArray(chatIds) || !chatIds.length) return;
+
+  chatIds.forEach((chatId) => {
+    const data = JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "Markdown",
+    });
+
+    const options = {
+      hostname: "api.telegram.org",
+      port: 443,
+      path: `/bot${token}/sendMessage`,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(data),
+      },
+    };
+
+    const reqTelegram = https.request(options);
+    reqTelegram.on("error", () => {});
+    reqTelegram.write(data);
+    reqTelegram.end();
+  });
+}
 
 function initializeDatabase() {
   db.run(`CREATE TABLE IF NOT EXISTS services (
@@ -535,7 +572,12 @@ app.post("/api/contact", (req, res) => {
     const settings = {};
     rows.forEach((r) => (settings[r.key] = r.value));
 
-    if (settings.telegram_token && settings.telegram_chat_id) {
+    const telegramToken = process.env.TELEGRAM_BOT_TOKEN || settings.telegram_token;
+    const chatIds = parseTelegramChatIds(
+      process.env.TELEGRAM_CHAT_IDS || process.env.TELEGRAM_CHAT_ID || settings.telegram_chat_id
+    );
+
+    if (telegramToken && chatIds.length) {
       const telegramMessage = `
 📩 *Новая заявка с сайта*
 
@@ -545,37 +587,8 @@ app.post("/api/contact", (req, res) => {
 💬 *Сообщение:*
 ${message || "Без сообщения"}
       `;
-
-      const https = require("https");
-      const data = JSON.stringify({
-        chat_id: settings.telegram_chat_id,
-        text: telegramMessage,
-        parse_mode: "Markdown",
-      });
-
-      const options = {
-        hostname: "api.telegram.org",
-        port: 443,
-        path: `/bot${settings.telegram_token}/sendMessage`,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(data),
-        },
-      };
-
-      const reqTelegram = https.request(options, (resTelegram) => {
-        let responseData = "";
-        resTelegram.on("data", (chunk) => (responseData += chunk));
-        resTelegram.on("end", () => {
-          if (resTelegram.statusCode === 200) res.json({ message: "Message sent successfully" });
-          else res.json({ message: "Message saved but failed to send notification" });
-        });
-      });
-
-      reqTelegram.on("error", () => res.json({ message: "Message saved but failed to send notification" }));
-      reqTelegram.write(data);
-      reqTelegram.end();
+      sendTelegramMessageToMany(telegramToken, chatIds, telegramMessage);
+      res.json({ message: "Message sent successfully" });
     } else {
       res.json({ message: "Application received (Telegram not configured)" });
     }
@@ -792,7 +805,12 @@ app.post("/api/orders", (req, res) => {
           const settings = {};
           rows.forEach((r) => (settings[r.key] = r.value));
           
-          if (settings.telegram_token && settings.telegram_chat_id) {
+          const telegramToken = process.env.TELEGRAM_BOT_TOKEN || settings.telegram_token;
+          const chatIds = parseTelegramChatIds(
+            process.env.TELEGRAM_CHAT_IDS || process.env.TELEGRAM_CHAT_ID || settings.telegram_chat_id
+          );
+
+          if (telegramToken && chatIds.length) {
             let itemsText = items.map(i => `- ${i.name} (${i.quantity} шт.) x ${i.price} сум`).join("\\n");
             
             const telegramMessage = `
@@ -807,29 +825,7 @@ app.post("/api/orders", (req, res) => {
 📦 *Товары:*
 ${itemsText}
             `;
-
-            const https = require("https");
-            const data = JSON.stringify({
-              chat_id: settings.telegram_chat_id,
-              text: telegramMessage,
-              parse_mode: "Markdown",
-            });
-
-            const options = {
-              hostname: "api.telegram.org",
-              port: 443,
-              path: `/bot${settings.telegram_token}/sendMessage`,
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Content-Length": Buffer.byteLength(data),
-              },
-            };
-
-            const reqTelegram = https.request(options);
-            reqTelegram.on('error', () => {});
-            reqTelegram.write(data);
-            reqTelegram.end();
+            sendTelegramMessageToMany(telegramToken, chatIds, telegramMessage);
           }
         }
       });
